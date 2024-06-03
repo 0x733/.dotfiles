@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # General
-doas apk add python-pip fastfetch android-tools rust npm git wget
+doas apk add py3-pip fastfetch android-tools rust npm git wget curl starship
 
 # Python
 pip3 install --break-system-packages -U pip yt-dlp setuptools wheel
@@ -31,8 +31,3 @@ flatpak install flathub io.freetubeapp.FreeTube
 flatpak install flathub io.github.mimbrero.WhatsAppDesktop
 flatpak install flathub com.mattjakeman.ExtensionManager
 flatpak install flathub com.github.ADBeveridge.Raider
-
-# Python Update
-python3 -m pip install --upgrade pip
-pip install pip-review --break-system-packages
-pip-review --local --interactive --break-system-packages
