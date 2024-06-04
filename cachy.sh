@@ -41,8 +41,6 @@ flatpak install flathub net.mullvad.MullvadBrowser
 flatpak install flathub com.brave.Browser
 flatpak install flathub io.freetubeapp.FreeTube
 flatpak install flathub io.github.mimbrero.WhatsAppDesktop
-flatpak install flathub com.mattjakeman.ExtensionManager
-flatpak install flathub com.github.ADBeveridge.Raider
 flatpak install flathub org.onionshare.OnionShare
 flatpak install flathub de.haeckerfelix.Fragments
 flatpak install flathub org.videolan.VLC
