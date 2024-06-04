@@ -25,7 +25,7 @@ git config --global user.name "Root"
 git config --global credential.helper "cache --timeout=36000"
 
 # ZSH
-sudo pacman -S zsh -y
+sudo pacman -Sy --noconfirm --noprogressbar --needed --disable-download-timeout zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 git clone https://github.com/zsh-users/zsh-completions.git ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
