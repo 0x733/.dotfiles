@@ -14,7 +14,7 @@ sudo pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg
 echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf
 
 # Packages 
-sudo pacman -S python-pip android-tools rust npm git wget curl starship -y
+sudo pacman -S python-pip android-tools rust npm git wget curl starship waydroid -y
 
 # Python
 pip3 install --break-system-packages -U pip yt-dlp
@@ -39,11 +39,14 @@ flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/fl
 flatpak update && flatpak upgrade
 flatpak install flathub net.mullvad.MullvadBrowser
 flatpak install flathub com.brave.Browser
-flatpak install flathub io.freetubeapp.FreeTube
 flatpak install flathub io.github.mimbrero.WhatsAppDesktop
 flatpak install flathub org.onionshare.OnionShare
 flatpak install flathub de.haeckerfelix.Fragments
 flatpak install flathub org.videolan.VLC
+flatpak install flathub io.frama.tractor.carburetor
+flatpak install flathub org.kde.dolphin
+flatpak install flathub org.kde.ark
+flatpak install flathub org.DolphinEmu.dolphin-emu
 xdg-user-dirs-update
 
 # Font
