@@ -43,6 +43,6 @@ alias mkv2mp4='mkv2mp4(){ ffmpeg -v quiet -stats -i "$@" -c copy -c:a aac -movfl
 export GPG_TTY=$(tty)
 
 
- * TR dil ayarları
+# * TR dil ayarları
 export LC_ALL=tr_TR.UTF-8
 export LANG=tr_TR.UTF-8
