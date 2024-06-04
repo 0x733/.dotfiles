@@ -18,10 +18,7 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-
-
 alias p="python3"
-alias c="clear"
 alias j='jsonVer(){ cat "$@" | jq; unset -f jsonVer; }; jsonVer'
 alias ara='ara(){ find / -type f -name "$@" -print 2>/dev/null }; ara'
 alias md2pdf='md2pdf(){ pandoc -o "${@%%.*}.pdf" --template pdf_theme --listings --pdf-engine=xelatex --toc "$@"; unset -f md2pdf; }; md2pdf'
@@ -42,7 +39,119 @@ alias mkv2mp4='mkv2mp4(){ ffmpeg -v quiet -stats -i "$@" -c copy -c:a aac -movfl
 # * GPG_KEY
 export GPG_TTY=$(tty)
 
-
 # * TR dil ayarları
 export LC_ALL=tr_TR.UTF-8
 export LANG=tr_TR.UTF-8
+
+# Update zshrc
+alias zrc='source ~/.zshrc'
+
+# Directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias c='clear'
+
+# List directory contents
+alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -alF'
+alias ls='ls --color=auto'
+
+# File operations
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias rm='rm -iv'
+alias mkdir='mkdir -pv'
+
+# Grep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+# Network
+alias wget='wget -c'
+alias curl='curl -O'
+alias myip='curl ipinfo.io/ip'
+
+# System info
+alias df='df -h'
+alias du='du -ch'
+alias free='free -m'
+alias top='btop'
+alias psu='ps -U $USER -u $USER u'
+
+# Disk usage
+alias usage='du -ch --max-depth=1'
+
+# Git
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gco='git checkout'
+alias gb='git branch'
+alias gd='git diff'
+alias gcl='git clone'
+
+# Archive operations
+alias tarc='tar -czvf'
+alias tarx='tar -xzvf'
+alias tarl='tar -tzvf'
+alias zipc='zip -r'
+alias unzipc='unzip'
+alias gz='gzip'
+alias gunz='gunzip'
+alias bz2='bzip2'
+alias bunz2='bunzip2'
+
+# Misc
+alias h='history'
+alias js='jobs -l'
+alias path='echo -e ${PATH//:/\\n}'
+alias now='date +"%T"'
+alias nowdate='date +"%d-%m-%Y"'
+alias week='date +"%V"'
+
+# Safety
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+alias rm='rm -I --preserve-root'
+
+# Make 'cd' also list directory contents
+function cd() {
+    builtin cd "$@" && ls
+}
+
+# Reload the .zshrc file
+alias reload='source ~/.zshrc'
+
+# Add custom PATH
+export PATH="$HOME/bin:$PATH"
+
+# Enable completions
+autoload -U compinit
+compinit
+
+# Enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# Load zsh-syntax-highlighting if installed
+if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+# Load zsh-autosuggestions if installed
+if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
