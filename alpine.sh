@@ -31,3 +31,9 @@ flatpak install flathub io.freetubeapp.FreeTube
 flatpak install flathub io.github.mimbrero.WhatsAppDesktop
 flatpak install flathub com.mattjakeman.ExtensionManager
 flatpak install flathub com.github.ADBeveridge.Raider
+flatpak install flathub org.onionshare.OnionShare
+flatpak install flathub de.haeckerfelix.Fragments
+
+# Fuck
+doas apk del firefox
+doas apk del epiphany
