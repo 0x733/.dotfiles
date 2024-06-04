@@ -33,6 +33,7 @@ flatpak install flathub com.mattjakeman.ExtensionManager
 flatpak install flathub com.github.ADBeveridge.Raider
 flatpak install flathub org.onionshare.OnionShare
 flatpak install flathub de.haeckerfelix.Fragments
+xdg-user-dirs-update
 
 # Fuck
 doas apk del firefox
