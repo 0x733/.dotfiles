@@ -14,7 +14,7 @@ sudo pacman -U 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg
 echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf
 
 # Packages 
-sudo pacman -S python-pip android-tools rust npm git wget curl starship waydroid -y
+sudo pacman -Sy --noconfirm --noprogressbar --needed --disable-download-timeout python-pip android-tools rust npm git wget curl starship waydroid -y
 
 # Python
 pip3 install --break-system-packages -U pip yt-dlp
@@ -33,7 +33,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions.git ${ZSH_CUSTOM:-~/.
 rm -rf ~/.zshrc && wget -O ~/.zshrc https://raw.githubusercontent.com/0x733/.dotfiles/main/.dots/.zshrc
 
 # Flatpak
-sudo pacman -S flatpak -y
+sudo pacman -Sy --noconfirm --noprogressbar --needed --disable-download-timeout flatpak
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo
 flatpak update && flatpak upgrade
