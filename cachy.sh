@@ -3,7 +3,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-LOGFILE="/var/log/setup_script.log"
+LOGFILE="${HOME}/setup_script.log"  
 exec &>> "${LOGFILE}"
 
 USER="${USER:-$(whoami)}"
