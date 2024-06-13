@@ -10,7 +10,97 @@ USER="${USER:-$(whoami)}"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
 DOTFILES_DIR="${HOME}/.dotfiles/.dots"
 
-# ... (log, warn, error_exit, show_progress fonksiyonları aynı kalıyor)
+log() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') $*"
+}
+
+warn() {
+  log "UYARI: $*" >&2
+}
+
+error_exit() {
+  log "HATA: $*" >&2
+  exit 1
+}
+
+show_progress() {
+  local msg="$1"
+  local total="$2"
+  local current=0
+
+  dialog --title "Kurulum" --gauge "$msg" 10 50 0
+
+  while [ $current -lt $total ]; do
+    ((current++))
+    dialog --gauge "" 10 50 $((current * 100 / total))
+    sleep 0.1
+  done
+
+  dialog --msgbox "İşlem tamamlandı." 5 30
+}
+
+update_system() {
+  log "Sistem güncelleniyor ve paketler yükleniyor..."
+  show_progress "Sistem güncelleniyor..." 1
+  sudo pacman -Syu --noconfirm || error_exit "Sistem güncelleme başarısız"
+}
+
+configure_hyprland() {
+  log "Hyprland yapılandırılıyor..."
+  show_progress "Hyprland yapılandırılıyor..." 1
+  mkdir -p "${CONFIG_DIR}"
+  cp "${CONFIG_DIR}/hyprland.conf" "${CONFIG_DIR}/hyprland.conf.bak" || warn "hyprland.conf yedekleme başarısız"
+  sed -i -e 's/^bind = CTRL, SPACE, exec, rofi -show combi.*/bind = CTRL, SPACE, exec, wofi/' \
+          -e 's/kb_layout = us/kb_layout = tr/' \
+          "${CONFIG_DIR}/hyprland.conf"
+}
+setup_chaotic_aur() {
+  log "Chaotic AUR kuruluyor..."
+  show_progress "Chaotic AUR kuruluyor..." 3
+  sudo pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com || error_exit "Chaotic AUR anahtarı alınamadı"
+  sudo pacman-key --lsign-key 3056513887B78AEB || error_exit "Chaotic AUR anahtarı yerel olarak imzalanamadı"
+  sudo pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' || error_exit "Chaotic AUR paketleri kurulamadı"
+  sudo cp /etc/pacman.conf /etc/pacman.conf.bak || error_exit "pacman.conf yedeklenemedi"
+  echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf || error_exit "Chaotic AUR, pacman.conf'da yapılandırılamadı"
+}
+
+install_packages() {
+  log "Ek paketler yükleniyor..."
+  local packages=(
+    "git"
+    "wget"
+    "curl"
+    "xdg-user-dirs"
+    "playerctl"
+    "unzip"
+    "zip"
+    "p7zip"
+    "unrar"
+    "tar"
+    "rsync"
+    "qt5ct"
+    "kvantum"
+  )
+  local total=${#packages[@]}
+
+  show_progress "Ek paketler yükleniyor (pacman)..." $total
+
+  for package in "${packages[@]}"; do
+    sudo pacman -S --noconfirm "$package" || error_exit "Paket yükleme başarısız: $package"
+  done
+
+  log "AUR paketleri yükleniyor (paru)..."
+  local aur_packages=(
+    "qt5-styleplugins"
+  )
+  total=${#aur_packages[@]}
+
+  show_progress "AUR paketleri yükleniyor (paru)..." $total
+
+  for package in "${aur_packages[@]}"; do
+    paru -S --noconfirm "$package" || error_exit "Paket yükleme başarısız: $package"
+  done
+}
 
 install_pacman_apps() {
   log "Pacman paketleri yükleniyor..."
@@ -33,7 +123,6 @@ install_pacman_apps() {
     sudo pacman -S --noconfirm "$package" || error_exit "Paket yükleme başarısız: $package"
   done
 }
-
 install_file_viewer() {
   log "Dosya görüntüleyici (pcmanfm) kuruluyor..."
   show_progress "Dosya görüntüleyici kuruluyor..." 1
@@ -87,7 +176,7 @@ setup_fonts() {
 
   cp "$DOTFILES_DIR/.fonts.conf" "$HOME/" || error_exit ".fonts.conf kopyalanamadı"
   cp -r "$DOTFILES_DIR/.fonts" "$HOME/" || error_exit ".fonts dizini kopyalanamadı"
-  cp -r "$DOTFILES_DIR/.config/fontconfig" ~/.config/ || error_exit "fontconfig kopyalanamadı"
+  cp -r "$DOTFILES_DIR/.config/fontconfig" "$HOME/.config/" || error_exit "fontconfig kopyalanamadı"
 }
 
 install_video_dependencies() {
