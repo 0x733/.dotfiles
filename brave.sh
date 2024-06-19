@@ -9,7 +9,7 @@ ublock_origin_url="https://github.com/gorhill/uBlock/releases/latest/download/uB
 ublock_config_url="https://raw.githubusercontent.com/0x733/.dotfiles/main/Brave%20%26%20Mullvad/ublock.txt"
 
 # Brave tarayıcı profil dizini
-brave_profile_dir="${HOME}/.config/BraveSoftware/Brave-Browser/Default"
+brave_profile_dir="/opt/brave-bin/resources/brave_extensions/chrome"
 
 # Ublock Origin Eklentisi için fonksiyon
 install_ublock_origin() {
