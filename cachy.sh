@@ -50,7 +50,7 @@ install_packages() {
 install_pacman_apps() {
   echo "Pacman paketleri yükleniyor..."
   local packages=(
-    "brave-browser-bin" "mullvad-browser-bin" "whatsapp-for-linux"
+    "brave-bin" "mullvad-browser-bin" "whatsapp-for-linux"
     "onionshare" "vlc" "dolphin-emu" "yt-dlp" "starship" "waydroid"
   )
   sudo pacman -Sy --noconfirm "${packages[@]}"
