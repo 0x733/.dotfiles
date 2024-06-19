@@ -9,7 +9,7 @@ ublock_origin_url="https://github.com/gorhill/uBlock/releases/latest/download/uB
 ublock_config_url="https://raw.githubusercontent.com/0x733/.dotfiles/main/Brave%20%26%20Mullvad/ublock.txt"
 
 # Brave tarayıcı profil dizini
-brave_profile_dir="/opt/brave-bin/resources/brave_extension/"
+brave_profile_dir="/opt/brave-bin/resources/brave_extension"
 
 # Ublock Origin Eklentisi için fonksiyon
 install_ublock_origin() {
@@ -24,17 +24,17 @@ install_ublock_origin() {
     
     # Eklenti dosyasının indirilmesi ve kurulması
     echo "Ublock Origin eklentisi indiriliyor ve kuruluyor..."
-    wget -O ublock.zip "$extension_url"
-    unzip -qo ublock.zip -d ublock
-    mkdir -p "$profile_dir/Extensions"
-    mv ublock/* "$profile_dir/Extensions/ublock@raymondhill.net"
+    sudo -u root wget -O ublock.zip "$extension_url"
+    sudo -u root unzip -qo ublock.zip -d ublock
+    sudo -u root mkdir -p "$profile_dir/ublock@raymondhill.net"
+    sudo -u root cp -r ublock/* "$profile_dir/ublock@raymondhill.net"
     
     # Konfigürasyon dosyasının yüklenmesi
     echo "Ublock Origin konfigürasyon dosyası yükleniyor..."
-    wget -O "$profile_dir/Extensions/ublock@raymondhill.net/config.txt" "$ublock_config_url"
+    sudo -u root wget -O "$profile_dir/ublock@raymondhill.net/config.txt" "$ublock_config_url"
     
     # Profil dizinindeki manifest dosyasının güncellenmesi
-    sed -i 's/"version":.*/"version": "1.0",/' "$profile_dir/Extensions/ublock@raymondhill.net/manifest.json"
+    sudo -u root sed -i 's/"version":.*/"version": "1.0",/' "$profile_dir/ublock@raymondhill.net/manifest.json"
     
     echo "Ublock Origin eklentisi başarıyla kuruldu ve yapılandırıldı."
 }
