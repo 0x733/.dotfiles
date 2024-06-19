@@ -1,4 +1,4 @@
-name: Test Scripts
+name: Test Scripts on Arch Linux
 
 on:
   push:
@@ -11,27 +11,41 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux/base:latest  # Arch Linux Docker imajı kullanılıyor
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
 
+      - name: Install necessary packages
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm bash  # Bash kurulumu (gerekirse)
+
+      - name: Make scripts executable
+        run: |
+          chmod +x cachy.sh
+          chmod +x chaotic.sh
+          chmod +x sddm.sh
+
       - name: Run Cachy script
         run: |
-          bash cachy.sh
+          ./cachy.sh
           exit_code=$?
           echo "Exit code for Cachy script: $exit_code"
           exit $exit_code
 
       - name: Run Chaotic script
         run: |
-          bash chaotic.sh
+          ./chaotic.sh
           exit_code=$?
           echo "Exit code for Chaotic script: $exit_code"
           exit $exit_code
 
       - name: Run SDDM script
         run: |
-          bash sddm.sh
+          ./sddm.sh
           exit_code=$?
           echo "Exit code for SDDM script: $exit_code"
           exit $exit_code
