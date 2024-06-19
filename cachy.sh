@@ -91,14 +91,6 @@ setup_zsh() {
   # .zshrc dosyasının indirilmesi
   rm -rf ~/.zshrc && wget -O ~/.zshrc https://raw.githubusercontent.com/0x733/.dotfiles/main/.dots/.zshrc
 
-  # ZSH dil ayarları
-  echo '# ZSH dil ayarları' >> ~/.zshrc
-  echo 'export LANG="tr_TR.UTF-8"' >> ~/.zshrc
-  echo 'export MANPATH="/usr/local/man:$MANPATH"' >> ~/.zshrc
-  echo 'export MANWIDTH=80' >> ~/.zshrc
-  echo 'export PAGER="less"' >> ~/.zshrc
-  echo 'export LESSCHARSET="utf-8"' >> ~/.zshrc
-
   # Kabuğu ZSH olarak ayarla
   chsh -s /bin/zsh
 }
