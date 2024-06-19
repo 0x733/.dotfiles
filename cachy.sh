@@ -40,11 +40,11 @@ install_packages() {
     "git" "wget" "curl" "xdg-user-dirs" "playerctl" "unzip" "zip"
     "p7zip" "unrar" "tar" "rsync" "qt5ct" "kvantum"
   )
-  sudo pacman -S --noconfirm "${packages[@]}"
+  sudo pacman -Sy --noconfirm "${packages[@]}"
 
   echo "AUR paketleri yükleniyor..."
   local aur_packages=("qt5-styleplugins")
-  paru -S --noconfirm "${aur_packages[@]}"
+  paru -Sy --noconfirm "${aur_packages[@]}"
 }
 
 install_pacman_apps() {
@@ -53,12 +53,12 @@ install_pacman_apps() {
     "brave-browser-bin" "mullvad-browser-bin" "whatsapp-for-linux"
     "onionshare" "vlc" "dolphin-emu" "yt-dlp" "starship" "waydroid"
   )
-  sudo pacman -S --noconfirm "${packages[@]}"
+  sudo pacman -Sy --noconfirm "${packages[@]}"
 }
 
 install_file_viewer() {
   echo "Dosya görüntüleyici (pcmanfm) kuruluyor..."
-  sudo pacman -Syu --noconfirm --needed pcmanfm
+  sudo pacman -Sy --noconfirm --needed pcmanfm
 }
 
 setup_kvantum_theme() {
