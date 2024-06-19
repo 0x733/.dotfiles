@@ -9,7 +9,7 @@ ublock_origin_url="https://github.com/gorhill/uBlock/releases/download/1.58.0/uB
 ublock_config_url="https://raw.githubusercontent.com/0x733/.dotfiles/main/Brave%20%26%20Mullvad/ublock.txt"
 
 # Brave tarayıcı profil dizini
-brave_profile_dir="$HOME/.config/BraveSoftware/Brave-Browser/Default/Extensions/ublock@raymondhill.net"
+brave_profile_dir="$HOME/.config/BraveSoftware/Brave-Browser/Default/Extensions/ublock@raymondhill.net/uBlock0.chromium"
 
 # Fonksiyonlar
 
@@ -51,10 +51,12 @@ install_ublock_origin() {
     fi
     
     # Manifest dosyasının güncellenmesi
-    if [ -f "$profile_dir/manifest.json" ]; then
-        sed -i 's/"version":.*/"version": "1.0",/' "$profile_dir/manifest.json"
+    local manifest_file="$profile_dir/manifest.json"
+    if [ -f "$manifest_file" ]; then
+        sed -i 's/"version":.*/"version": "1.0",/' "$manifest_file"
+        echo "Ublock Origin manifest dosyası güncellendi."
     else
-        echo "Hata: Manifest dosyası bulunamadı."
+        echo "Hata: Manifest dosyası bulunamadı veya dizin yanlış."
         return 1
     fi
     
