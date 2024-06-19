@@ -126,3 +126,6 @@ if [[ $(id -u) -eq 0 ]]; then
 fi
 
 main
+
+# .dotfiles dizinini sil
+rm -rf ~/.dotfiles
