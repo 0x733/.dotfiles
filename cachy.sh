@@ -144,7 +144,4 @@ fi
 
 main
 
-# .dotfiles dizinini sil
-rm -rf ~/.dotfiles
-
 echo "Script başarıyla çalıştı. İşlem tamamlandı."
