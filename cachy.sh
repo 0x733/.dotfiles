@@ -80,9 +80,14 @@ setup_zsh() {
   echo "ZSH kuruluyor..."
   sudo pacman -Sy --noconfirm --needed zsh
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-  git clone https://github.com/zsh-users/zsh-completions.git "${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions"
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
-  git clone https://github.com/zsh-users/zsh-autosuggestions.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+
+  # ZSH için gerekli pluginlerin kurulumu
+  echo "ZSH pluginleri kuruluyor..."
+  git clone --depth 1 https://github.com/zsh-users/zsh-completions.git "${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions"
+  git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting"
+  git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions.git "${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions"
+
+  # .zshrc dosyasının indirilmesi
   rm -rf ~/.zshrc && wget -O ~/.zshrc https://raw.githubusercontent.com/0x733/.dotfiles/main/.dots/.zshrc
 }
 
