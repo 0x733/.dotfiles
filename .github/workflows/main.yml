@@ -16,21 +16,21 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run Cachy script
-        run: bash scripts/cachy.sh
+        run: bash cachy.sh
         continue-on-error: true  # Continue to next step even if this script fails
 
       - name: Verify exit status for Cachy script
         run: exit_code=$? && echo "Exit code for Cachy script: $exit_code" && exit $exit_code
 
       - name: Run Chaotic script
-        run: bash scripts/chaotic.sh
+        run: bash chaotic.sh
         continue-on-error: true  # Continue to next step even if this script fails
 
       - name: Verify exit status for Chaotic script
         run: exit_code=$? && echo "Exit code for Chaotic script: $exit_code" && exit $exit_code
 
       - name: Run SDDM script
-        run: bash scripts/sddm.sh
+        run: bash sddm.sh
         continue-on-error: true  # Continue to next step even if this script fails
 
       - name: Verify exit status for SDDM script
