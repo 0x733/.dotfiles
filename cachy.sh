@@ -89,23 +89,15 @@ setup_zsh() {
 
   # .zshrc dosyasının indirilmesi
   rm -rf ~/.zshrc && wget -O ~/.zshrc https://raw.githubusercontent.com/0x733/.dotfiles/main/.dots/.zshrc
+
+  # ZSH dil ayarları
+  echo '# ZSH dil ayarları' >> ~/.zshrc
+  echo 'export LANG="tr_TR.UTF-8"' >> ~/.zshrc
+  echo 'export MANPATH="/usr/local/man:$MANPATH"' >> ~/.zshrc
+  echo 'export MANWIDTH=80' >> ~/.zshrc
+  echo 'export PAGER="less"' >> ~/.zshrc
+  echo 'export LESSCHARSET="utf-8"' >> ~/.zshrc
 }
-
-#!/bin/bash
-
-# ~/.zshrc dosyasına LANG değişkenini Türkçe olarak ekleyin
-echo 'export LANG="tr_TR.UTF-8"' >> ~/.zshrc
-
-# Man sayfa ayarlarını güncelleyin
-echo 'export MANPATH="/usr/local/man:$MANPATH"' >> ~/.zshrc
-echo 'export MANWIDTH=80' >> ~/.zshrc
-echo 'export PAGER="less"' >> ~/.zshrc
-echo 'export LESSCHARSET="utf-8"' >> ~/.zshrc
-
-# Değişikliklerin etkili olması için ZSH oturumunu yeniden başlatın
-source ~/.zshrc
-
-echo "ZSH dil ayarları başarıyla güncellendi. ZSH oturumunu yeniden başlatabilirsiniz."
 
 update_user_dirs() {
   echo "Kullanıcı dizinleri güncelleniyor..."
@@ -150,3 +142,5 @@ main
 
 # .dotfiles dizinini sil
 rm -rf ~/.dotfiles
+
+echo "Script başarıyla çalıştı. İşlem tamamlandı."
