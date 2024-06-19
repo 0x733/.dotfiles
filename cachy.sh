@@ -50,8 +50,8 @@ install_packages() {
 install_pacman_apps() {
   echo "Pacman paketleri yükleniyor..."
   local packages=(
-    "brave-bin" "mullvad-browser-bin" "whatsapp-for-linux"
-    "onionshare" "vlc" "dolphin-emu" "yt-dlp" "starship" "waydroid"
+    "brave-bin" "mullvad-browser-bin" "onionshare"
+    "vlc" "dolphin-emu" "yt-dlp" "starship" "waydroid"
   )
   sudo pacman -Sy --noconfirm "${packages[@]}"
 }
@@ -97,6 +97,15 @@ setup_zsh() {
   echo 'export MANWIDTH=80' >> ~/.zshrc
   echo 'export PAGER="less"' >> ~/.zshrc
   echo 'export LESSCHARSET="utf-8"' >> ~/.zshrc
+
+  # Kabuğu ZSH olarak ayarla
+  chsh -s /bin/zsh
+}
+
+install_flatpak_whatsapp() {
+  echo "Flatpak ve WhatsApp Desktop kuruluyor..."
+  sudo pacman -Sy --noconfirm flatpak
+  flatpak install flathub io.github.mimbrero.WhatsAppDesktop -y
 }
 
 update_user_dirs() {
@@ -126,6 +135,7 @@ main() {
   setup_kvantum_theme
   configure_git
   setup_zsh
+  install_flatpak_whatsapp
   update_user_dirs
   setup_fonts
   install_video_dependencies
