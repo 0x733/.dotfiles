@@ -11,23 +11,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux/base:latest  # Arch Linux Docker imajı kullanılıyor
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Install necessary packages
+      - name: Install necessary packages for Arch Linux compatibility
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm bash  # Bash kurulumu (gerekirse)
-
-      - name: Make scripts executable
-        run: |
-          chmod +x cachy.sh
-          chmod +x chaotic.sh
-          chmod +x sddm.sh
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
 
       - name: Run Cachy script
         run: |
