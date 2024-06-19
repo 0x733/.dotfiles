@@ -13,13 +13,18 @@ install_dependencies() {
   sudo pacman -Sy --noconfirm qt6-svg qt6-declarative
 }
 
+# Geçici dosyaları temizleme fonksiyonu
+cleanup() {
+  echo "Geçici dosyalar temizleniyor..."
+  rm -rf /tmp/catppuccin-mocha*
+}
+
 # SDDM teması indirme ve kurulum
 install_sddm_theme() {
   echo "SDDM teması indiriliyor ve kuruluyor..."
-  wget https://github.com/catppuccin/sddm/releases/download/v1.0.0/catppuccin-mocha.zip -O /tmp/catppuccin-mocha.zip
-  unzip /tmp/catppuccin-mocha.zip -d /tmp
+  wget -q --show-progress --progress=bar:force:noscroll -O /tmp/catppuccin-mocha.zip https://github.com/catppuccin/sddm/releases/download/v1.0.0/catppuccin-mocha.zip
+  unzip -q /tmp/catppuccin-mocha.zip -d /tmp
   sudo mv /tmp/catppuccin-mocha /usr/share/sddm/themes/
-  rm /tmp/catppuccin-mocha.zip
 }
 
 # SDDM yapılandırma dosyasına tema ekleme
@@ -46,5 +51,8 @@ if [[ $(id -u) -eq 0 ]]; then
   echo "Lütfen bu komut dosyasını root olarak çalıştırmayın. Normal kullanıcı hesabınızı kullanın."
   exit 1
 fi
+
+# Geçici dosyaları temizlemek için trap ayarı
+trap cleanup EXIT
 
 main
