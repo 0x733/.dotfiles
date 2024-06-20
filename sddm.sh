@@ -1,24 +1,42 @@
 #!/bin/bash
 
-# SDDM tema yapılandırması için gerekli bağımlılıkları yükle
-sudo pacman -Syu --noconfirm qt6-svg qt6-declarative
+echo "SDDM Tema Kurulum Scripti başlatılıyor..."
 
-# İndirilecek dosya ve dizinleri tanımla
-tema_zip="catppuccin-mocha.zip"
-tema_klasor="/usr/share/sddm/themes/"
-sddm_conf="/etc/sddm.conf"
+# Root yetkilerinin kontrolü
+if [[ $EUID -ne 0 ]]; then
+   echo "Bu scriptin çalışması için root yetkilerine ihtiyacınız var. Lütfen sudo ile çalıştırın." 
+   exit 1
+fi
+
+# Bağımlılıkları kur (onay gerektirmeden)
+echo "Gerekli bağımlılıklar kuruluyor..."
+pacman --noconfirm -Syu qt6-svg qt6-declarative || { 
+    echo "Hata: Bağımlılıklar kurulamadı. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin." 
+    exit 1 
+}
 
 # Temayı indir
-if [ ! -f "$tema_zip" ]; then
-    wget https://github.com/catppuccin/sddm/releases/download/v1.0.0/catppuccin-mocha.zip
-fi
+echo "Tema indiriliyor..."
+wget -P /usr/share/sddm/themes/ https://github.com/catppuccin/sddm/releases/download/v1.0.0/catppuccin-mocha.zip || { 
+    echo "Hata: Tema indirilemedi. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin." 
+    exit 1 
+}
 
-# İndirilen zip dosyasını /usr/share/sddm/themes/ dizinine çıkart
-sudo unzip -o "$tema_zip" -d "$tema_klasor"
+# Temayı unzip et
+echo "Tema açılıyor..."
+unzip /usr/share/sddm/themes/catppuccin-mocha.zip -d /usr/share/sddm/themes/ || { 
+    echo "Hata: Tema açılamadı." 
+    exit 1 
+}
 
-# sddm.conf dosyasını düzenle
-if ! grep -q "\[Theme\]" "$sddm_conf"; then
-    sudo bash -c 'echo -e "\n[Theme]\nCurrent=catppuccin-mocha" >> "$sddm_conf"'
-else
-    sudo sed -i '/\[Theme\]/a Current=catppuccin-mocha' "$sddm_conf"
+# Zip dosyasını sil
+echo "Zip dosyası siliniyor..."
+rm /usr/share/sddm/themes/catppuccin-mocha.zip
+
+# Tema ayarını yap (Eğer [Theme] bölümü yoksa ekle)
+if ! grep -q "^\[Theme\]" /etc/sddm.conf; then
+    echo "[Theme]" | tee -a /etc/sddm.conf
 fi
+echo "Current=catppuccin-mocha" | tee -a /etc/sddm.conf
+
+echo "SDDM Tema Kurulum Scripti başarıyla tamamlandı!"
