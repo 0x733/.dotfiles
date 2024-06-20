@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Dizinler ve uzantılar için diziler
 dizinler=(
     "$HOME/.cache"
-    "$HOME/.thumbnails"
     "/tmp"
     "/var/tmp"
     "/var/log"
@@ -20,24 +18,22 @@ uzantilar=(
     "*.xz"
 )
 
-# temizle_dizin fonksiyonu: Dizinleri güvenli bir şekilde temizler
 temizle_dizin() {
     dizin="$1"
     gun="$2"
 
     if [ -d "$dizin" ]; then
-        # sudo gerektiren dizinler için ayrı işlem
         if [[ "$dizin" == "/var/log" || "$dizin" == "/var/tmp" ]]; then
             if [ -n "$gun" ]; then
-                sudo find "$dizin" -type f -mtime +"$gun" \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uzn {} +
+                sudo find "$dizin" -type f -mtime +"$gun" \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uz {} +
             else
-                sudo find "$dizin" -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uzn {} +
+                sudo find "$dizin" -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uz {} +
             fi
-        else  # sudo gerektirmeyen dizinler
+        else
             if [ -n "$gun" ]; then
-                find "$dizin" -type f -mtime +"$gun" \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uzn {} +
+                find "$dizin" -type f -mtime +"$gun" \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uz {} +
             else
-                find "$dizin" -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uzn {} +
+                find "$dizin" -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o ... \) -exec shred -uz {} +
             fi
         fi
     fi
@@ -69,12 +65,14 @@ else
     done
 fi
 
-# Boş dizinleri sil (sudo gerektirenler için ayrı işlem)
+# Boş dizinleri sil
 for dizin in "${dizinler[@]}"; do
-    if [[ "$dizin" == "/var/log" || "$dizin" == "/var/tmp" ]]; then
-        sudo find "$dizin" -type d -empty -delete
-    else
-        find "$dizin" -type d -empty -delete
+    if [ -d "$dizin" ]; then 
+        if [[ "$dizin" == "/var/log" || "$dizin" == "/var/tmp" ]]; then
+            sudo find "$dizin" -mindepth 1 -type d -empty -delete 
+        else
+            find "$dizin" -mindepth 1 -type d -empty -delete 
+        fi
     fi
 done
 
