@@ -45,8 +45,8 @@ temizle_dizin() {
 
 # Geçmişi temizle (root gerektirmez)
 history -c
-shred -uzn ~/.zsh_history
-shred -uzn ~/.bash_history
+shred -uz ~/.zsh_history
+shred -uz ~/.bash_history
 
 # Pacman işlemleri (sudo gerektirir)
 sudo pacman -Sc  # Önbelleği senkronize et
