@@ -1,36 +1,25 @@
 import requests
 import json
-import csv
 
-# Kullanıcıdan kod al
-kod = input("Lütfen kodunuzu girin: ")
+while True:  # Kullanıcı doğru bir kod girene kadar devam et
+    kod = input("Lütfen sorgulamak istediğiniz kodu girin (Çıkmak için 'q' yazın): ")
 
-# API isteği gönder
-url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={kod}&datatype=checkAddress"
-response = requests.get(url)
+    if kod.lower() == 'q':
+        break  # Kullanıcı 'q' girerse döngüden çık
 
-# Hata kontrolü: İstek başarısız olursa
-if response.status_code != 200:
-    print(f"Hata: API isteği başarısız oldu. Hata kodu: {response.status_code}")
-    exit(1)
+    url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={kod}&datatype=checkAddress"
 
-# JSON verilerini ayrıştır
-data = response.json()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
 
-# CSV dosyası oluştur
-with open("adresler.csv", "w", newline="") as csvfile:
-    writer = csv.writer(csvfile)
+        data = response.json()
 
-    # Başlıkları yaz
-    writer.writerow(["Anahtar", "Parametre", "Değer"])
+        if "success" in data and data["success"]:  # Başarılı bir sonuç kontrolü
+            formatted_data = json.dumps(data, indent=4, ensure_ascii=False)
+            print(formatted_data)
+        else:
+            print("Geçersiz kod veya adres bulunamadı.")
 
-    # Verileri CSV'ye yaz
-    for key, value in data.items():
-        for item in value["flexList"]["flexList"]:
-            # Boş değerleri ve hata bilgilerini atla
-            if not item["value"] or item["name"] in ["hataKod", "hataMesaj"]:
-                continue
-
-            writer.writerow([key, item["name"], item["value"]])
-
-print("Adres bilgileri 'adresler.csv' dosyasına kaydedildi.")
+    except requests.exceptions.RequestException as e:
+        print(f"Hata oluştu: {e}")
