@@ -20,6 +20,11 @@ if [ $? -ne 0 ]; then
 fi
 
 # JSON verilerini işle ve tabloyu dosyaya kaydet
-jq '.[] | [.IL, .ILCE, .BUCAK, .KOY, .MAHALLE, .CADDE, .SOKAK, .SITE, .APT, .NO, .DAIRE, .IC_KAPI_NO]' "$FILE" | column -t > adresler.txt
+jq -r 'keys[] as $k | .[$k].flexList.flexList[] | [.name, .value] | @tsv' "$FILE" > adresler.txt
+
+# Boş satırları ve hata içeren satırları kaldır
+sed -i '/^$/d' adresler.txt
+sed -i '/hataKod/d' adresler.txt
+sed -i '/hataMesaj/d' adresler.txt
 
 echo "Adres bilgileri 'adresler.txt' dosyasına kaydedildi."
