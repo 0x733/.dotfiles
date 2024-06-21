@@ -27,11 +27,10 @@ with open("adresler.csv", "w", newline="") as csvfile:
     # Verileri CSV'ye yaz
     for key, value in data.items():
         for item in value["flexList"]["flexList"]:
-            # Boş nesneleri ve hata bilgilerini atla
-            if isinstance(item["value"], dict) and not item["value"]:
+            # Boş değerleri ve hata bilgilerini atla
+            if not item["value"] or item["name"] in ["hataKod", "hataMesaj"]:
                 continue
-            if item["name"] in ["hataKod", "hataMesaj"]:
-                continue
+
             writer.writerow([key, item["name"], item["value"]])
 
 print("Adres bilgileri 'adresler.csv' dosyasına kaydedildi.")
