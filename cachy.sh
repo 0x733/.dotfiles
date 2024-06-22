@@ -34,6 +34,15 @@ setup_chaotic_aur() {
   echo -e "\n[chaotic-aur]\nInclude = /etc/pacman.d/chaotic-mirrorlist" | sudo tee -a /etc/pacman.conf
 }
 
+setup_black_arch() {
+  echo "Black Arch kuruluyor..."
+  curl -O https://blackarch.org/strap.sh
+  echo "5f3d815e424213e9b6b278a859f6d47426f0b3b0 strap.sh" | sha1sum -c -
+  chmod +x strap.sh
+  sudo ./strap.sh
+  rm strap.sh
+}
+
 install_packages() {
   echo "Ek paketler yükleniyor..."
   local packages=(
@@ -132,6 +141,7 @@ main() {
   update_system
   configure_hyprland
   setup_chaotic_aur
+  setup_black_arch
   install_packages
   install_pacman_apps
   install_file_viewer
