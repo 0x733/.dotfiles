@@ -15,9 +15,21 @@ UPLOAD_SPEED_KBPS=$(echo "$UPLOAD_SPEED * 1000" | bc)
 echo "Download Hızı: $DOWNLOAD_SPEED_KBPS Kbps"
 echo "Upload Hızı: $UPLOAD_SPEED_KBPS Kbps"
 
-# Tam hızların %90'ını kullanarak SQM ayarlarını hesaplama
-SQM_DOWNLOAD=$(echo "$DOWNLOAD_SPEED_KBPS * 0.9" | bc | awk '{print int($1+0.5)}')
-SQM_UPLOAD=$(echo "$UPLOAD_SPEED_KBPS * 0.9" | bc | awk '{print int($1+0.5)}')
+# Hızların yüzdelik oranlarını hesaplama fonksiyonu
+calculate_sqm() {
+  local speed=$1
+  local percentage=$2
+  echo $(echo "$speed * $percentage" | bc | awk '{print int($1+0.5)}')
+}
 
-echo "Önerilen SQM için ayarlanacak Download Hızı: $SQM_DOWNLOAD Kbps"
-echo "Önerilen SQM için ayarlanacak Upload Hızı: $SQM_UPLOAD Kbps"
+# Yüzdelik oranlar
+PERCENTAGES="90 85 80"
+
+for PERCENTAGE in $PERCENTAGES; do
+  PERCENT=$(echo "$PERCENTAGE / 100" | bc -l)
+  SQM_DOWNLOAD=$(calculate_sqm $DOWNLOAD_SPEED_KBPS $PERCENT)
+  SQM_UPLOAD=$(calculate_sqm $UPLOAD_SPEED_KBPS $PERCENT)
+  
+  echo "Önerilen SQM için ayarlanacak Download Hızı ($PERCENTAGE%): $SQM_DOWNLOAD Kbps"
+  echo "Önerilen SQM için ayarlanacak Upload Hızı ($PERCENTAGE%): $SQM_UPLOAD Kbps"
+done
