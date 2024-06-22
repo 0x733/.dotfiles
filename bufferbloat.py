@@ -1,10 +1,15 @@
 import subprocess
 import statistics
+import platform
 
 def ping(host, count):
-    command = ['ping', '-c', str(count), host]
-    output = subprocess.run(command, capture_output=True, text=True).stdout
-    return output
+    param = '-n' if platform.system().lower() == 'windows' else '-c'
+    command = ['ping', param, str(count), host]
+    try:
+        output = subprocess.run(command, capture_output=True, text=True, timeout=60).stdout
+        return output
+    except subprocess.TimeoutExpired:
+        return ""
 
 def parse_ping_output(output):
     lines = output.split('\n')
@@ -12,6 +17,9 @@ def parse_ping_output(output):
     for line in lines:
         if 'time=' in line:
             time_str = line.split('time=')[1].split(' ')[0]
+            times.append(float(time_str))
+        elif 'time<' in line:  # For Windows outputs with "time<1ms"
+            time_str = line.split('time<')[1].split('ms')[0]
             times.append(float(time_str))
     return times
 
