@@ -3,10 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/html"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 )
 
