@@ -1,8 +1,12 @@
 #!/bin/sh
 
-# İnternet hız testi
+# En uygun speedtest sunucusunu bulma
+echo "En uygun speedtest sunucusunu bulma..."
+BEST_SERVER=$(speedtest-go --list | grep -i 'best server' | awk '{print $3}')
+
+# Hız testi yapılıyor...
 echo "Hız testi yapılıyor..."
-SPEEDTEST_OUTPUT=$(speedtest-go --nearest)
+SPEEDTEST_OUTPUT=$(speedtest-go --server $BEST_SERVER)
 
 # Download ve Upload hızlarını çıkarma
 DOWNLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | grep "Download" | awk '{print $2}')
