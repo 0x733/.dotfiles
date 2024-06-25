@@ -8,9 +8,15 @@ BEST_SERVER=$(speedtest-go --list | grep -i 'best server' | awk '{print $3}')
 echo "Hız testi yapılıyor..."
 SPEEDTEST_OUTPUT=$(speedtest-go --server $BEST_SERVER)
 
-# Download ve Upload hızlarını çıkarma
-DOWNLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | grep "Download" | awk '{print $2}')
-UPLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | grep "Upload" | awk '{print $2}')
+# Download ve Upload hızlarını alıyoruz
+DOWNLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | awk '/Download/ {print $2}')
+UPLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | awk '/Upload/ {print $2}')
+
+# Eğer çıktıda "Download" ve "Upload" hızları yoksa hata mesajı verelim
+if [ -z "$DOWNLOAD_SPEED" ] || [ -z "$UPLOAD_SPEED" ]; then
+  echo "Hız testi sonucu alınamadı. Lütfen tekrar deneyin veya speedtest-go komutunu kontrol edin."
+  exit 1
+fi
 
 # Hızları Kbps cinsine çevirme (Speedtest-go sonucu Mbps cinsindendir)
 DOWNLOAD_SPEED_KBPS=$(echo "$DOWNLOAD_SPEED * 1000" | bc)
