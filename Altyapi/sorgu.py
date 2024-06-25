@@ -1,14 +1,39 @@
 import requests
-import json
-from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 from json2html import json2html
+from datetime import datetime, timedelta
 
 bbk = "0000000000"
-url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
+url_bbk = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
+url_scrape = "https://goknet.com.tr/internet-altyapi-sorgulama/"
+
+def scrape_table():
+    try:
+        response = requests.get(url_scrape)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # 'tt-tab' class'ına sahip tabloyu bul
+        table = soup.find('table', class_='tt-tab')
+
+        if table:
+            # Tabloyu HTML olarak al
+            table_html = str(table)
+            return table_html
+        else:
+            print("Belirtilen tablo bulunamadı.")
+            return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"İstek hatası: {e}")
+    except Exception as e:
+        print(f"Beklenmeyen hata: {e}")
+
+    return None
 
 def check_port_status():
     try:
-        response = requests.get(url)
+        response = requests.get(url_bbk)
         response.raise_for_status()
         json_data = response.json()
 
@@ -27,28 +52,39 @@ def check_port_status():
         # JSON verisini HTML'e dönüştür
         html_table = json2html.convert(json=json_data)
 
-        # HTML dosyasını kaydet
-        filename = f"port_status_{current_time}.html"
-        with open(filename, 'w', encoding='utf-8') as file:
-            file.write(html_table)
-            print(f"HTML dosyası kaydedildi: {filename}")
+        # Kazıma işleminden gelen HTML tablosunu al
+        scraped_table = scrape_table()
 
-        return True  # Başarılı bir şekilde işlendiği bilgisini döndür
+        if scraped_table:
+            # Ana HTML dosyasını oluştur
+            html_content = f"""
+            <html>
+            <head><title>Port Durumu</title></head>
+            <body>
+            <h2>Port Durumu Bilgileri</h2>
+            {html_table}
+            <h2>Kazınan Tablo</h2>
+            {scraped_table}
+            </body>
+            </html>
+            """
+
+            # HTML dosyasını kaydet
+            filename = f"port_status_{current_time}.html"
+            with open(filename, 'w', encoding='utf-8') as file:
+                file.write(html_content)
+                print(f"HTML dosyası kaydedildi: {filename}")
+
+            return True
 
     except requests.exceptions.RequestException as e:
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-        print(f"[{current_time}] İstek hatası: {e}")
+        print(f"İstek hatası: {e}")
     except json.JSONDecodeError as e:
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-        print(f"[{current_time}] JSON ayrıştırma hatası: {e}")
+        print(f"JSON ayrıştırma hatası: {e}")
     except Exception as e:
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-        print(f"[{current_time}] Beklenmeyen hata: {e}")
+        print(f"Beklenmeyen hata: {e}")
 
-    return False  # Hata durumunda False döndür
+    return False
 
 if check_port_status():
     print("Program sonlandı.")
