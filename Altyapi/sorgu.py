@@ -2,6 +2,7 @@ import requests
 import json
 import time
 from datetime import datetime, timedelta
+from json2html import json2html
 
 bbk = "0000000000"
 url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
@@ -13,22 +14,23 @@ def check_port_status():
         response.raise_for_status()
         json_data = response.json()
 
-        if '6' in json_data and 'flexList' in json_data['6'] and 'flexList' in json_data['6']['flexList'] and len(json_data['6']['flexList']['flexList']) > 2:
-            port_value = json_data['6']['flexList']['flexList'][2]['value']
-            error_code = json_data['6']['hataKod']
-            message = json_data['6']['hataMesaj']
+        port_value = json_data.get('6', {}).get('flexList', {}).get('flexList', [])[2].get('value', '')
+        error_code = json_data.get('6', {}).get('hataKod', '')
+        message = json_data.get('6', {}).get('hataMesaj', '')
 
-            port_status = 'VAR' if port_value == '1' else 'YOK'
+        port_status = 'VAR' if port_value == '1' else 'YOK'
 
-            now = datetime.now()
-            current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-            log_message = f"[{current_time}] Port Durumu: {port_status}, Hata Kodu: {error_code}, Mesaj: {message}"
-            print(log_message)
-        else:
-            now = datetime.now()
-            current_time = now.strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[{current_time}] Beklenen JSON yapısı bulunamadı")
+        log_message = f"[{current_time}] Port Durumu: {port_status}, Hata Kodu: {error_code}, Mesaj: {message}"
+        print(log_message)
+
+        # JSON verisini HTML'e dönüştür
+        html_table = json2html.convert(json=json_data)
+
+        # HTML tablosunu yazdır
+        print(html_table)
 
     except requests.exceptions.RequestException as e:
         now = datetime.now()
