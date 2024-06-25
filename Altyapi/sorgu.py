@@ -26,8 +26,11 @@ def check_port_status():
         log_message = f"[{current_time}] Port Durumu: {port_status}, Hata Kodu: {error_code}, Mesaj: {message}"
         print(log_message)
 
-        # JSON verisini HTML'e dönüştür (daha düzenli)
-        html_table = json2html.convert(json=json_data, indent=2)
+        # JSON verisini düzgün bir şekilde formatla
+        formatted_json = json.dumps(json_data, indent=2)
+
+        # Düzgün JSON formatını HTML'e dönüştür
+        html_table = json2html.convert(json=formatted_json)
 
         # HTML tablosunu dosyaya yaz
         filename = f"port_status_{current_time}.html"
