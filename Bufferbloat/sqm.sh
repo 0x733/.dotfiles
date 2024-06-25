@@ -55,19 +55,6 @@ packet_loss_test() {
   sudo mtr -r -c 10 $target
 }
 
-# Bufferbloat testi
-bufferbloat_test() {
-  echo "Bufferbloat testi: netperf ile"
-  
-  # Netserver'ın çalıştığını kontrol et ve başlat
-  if ! pgrep netserver > /dev/null; then
-    echo "Netserver başlatılıyor..."
-    sudo netserver
-  fi
-  
-  netperf -H localhost -l 60 -- -P 0 -D 1 -o THROUGHPUT,MEAN_LATENCY
-}
-
 # Testleri çalıştırma
 run_tests() {
   local targets=$1
@@ -79,9 +66,9 @@ run_tests() {
 }
 
 # Test hedefleri
-DNS_SERVERS="8.8.8.8 1.1.1.1"
-SEARCH_ENGINES="google.com bing.com"
-GAME_SERVERS="csgo.com leagueoflegends.com"
+DNS_SERVERS="8.8.8.8 1.1.1.1 9.9.9.9 208.67.222.222 8.8.4.4"
+SEARCH_ENGINES="google.com bing.com duckduckgo.com yahoo.com baidu.com"
+GAME_SERVERS="csgo.com leagueoflegends.com dota2.com overwatch.com pubg.com"
 
 # DNS sunucuları test et
 echo "DNS Sunucuları test ediliyor..."
@@ -94,8 +81,5 @@ run_tests "$SEARCH_ENGINES"
 # Oyun sunucuları test et
 echo "Oyun Sunucuları test ediliyor..."
 run_tests "$GAME_SERVERS"
-
-# Bufferbloat testi yap
-bufferbloat_test
 
 echo "Tüm testler tamamlandı."
