@@ -2,13 +2,13 @@
 
 # İnternet hız testi
 echo "Hız testi yapılıyor..."
-SPEEDTEST_OUTPUT=$(speedtest-cli --simple)
+SPEEDTEST_OUTPUT=$(speedtest-go --nearest)
 
 # Download ve Upload hızlarını çıkarma
 DOWNLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | grep "Download" | awk '{print $2}')
 UPLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | grep "Upload" | awk '{print $2}')
 
-# Hızları Kbps cinsine çevirme (Speedtest-cli sonucu Mbps cinsindendir)
+# Hızları Kbps cinsine çevirme (Speedtest-go sonucu Mbps cinsindendir)
 DOWNLOAD_SPEED_KBPS=$(echo "$DOWNLOAD_SPEED * 1000" | bc)
 UPLOAD_SPEED_KBPS=$(echo "$UPLOAD_SPEED * 1000" | bc)
 
