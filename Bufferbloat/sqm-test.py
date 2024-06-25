@@ -8,8 +8,8 @@ def run_speedtest():
     st.download()
     st.upload()
     st_results = st.results.dict()
-    download_speed = st_results["download"] / 1_000_000  # Convert to Mbps
-    upload_speed = st_results["upload"] / 1_000_000  # Convert to Mbps
+    download_speed = st_results["download"]  # in bits per second
+    upload_speed = st_results["upload"]  # in bits per second
     latency = st_results["ping"]
     return download_speed, upload_speed, latency
 
@@ -26,7 +26,7 @@ def run_dns_test(dns_server):
     resolver.nameservers = [dns_server]
     start_time = time.time()
     try:
-        resolver.query('google.com')
+        resolver.resolve('google.com')
         end_time = time.time()
         query_time = end_time - start_time
         return query_time
@@ -34,29 +34,28 @@ def run_dns_test(dns_server):
         return str(e)
 
 def display_speedtest_results(download_speed):
+    download_speed_kbps = download_speed / 1000  # Convert to kbps
     for percent in range(90, 79, -5):
-        print(f"{percent}% of download speed: {download_speed * (percent / 100):.2f} Mbps")
+        print(f"{percent}% of download speed: {download_speed_kbps * (percent / 100):.2f} kbps")
 
 def main():
-    # Run Speedtest
     download_speed, upload_speed, latency = run_speedtest()
-    print(f"Download Speed: {download_speed:.2f} Mbps")
-    print(f"Upload Speed: {upload_speed:.2f} Mbps")
+    download_speed_mbps = download_speed / 1_000_000  # Convert to Mbps
+    upload_speed_mbps = upload_speed / 1_000_000  # Convert to Mbps
+
+    print(f"Original Download Speed: {download_speed_mbps:.2f} Mbps ({download_speed:.2f} bps)")
+    print(f"Original Upload Speed: {upload_speed_mbps:.2f} Mbps ({upload_speed:.2f} bps)")
     print(f"Latency: {latency:.2f} ms")
 
-    # Display speedtest results from 90% to 80%
     display_speedtest_results(download_speed)
 
-    # Run Ping Test
     host = "8.8.8.8"
     print(f"Ping Test to {host}:")
     print(run_ping_test(host))
 
-    # Run Traceroute Test
     print(f"Traceroute Test to {host}:")
     print(run_traceroute_test(host))
 
-    # Run DNS Test
     dns_server = "8.8.8.8"
     print(f"DNS Test to {dns_server}:")
     dns_time = run_dns_test(dns_server)
