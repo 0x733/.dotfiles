@@ -3,7 +3,11 @@ import time
 
 def get_librespeed_servers():
     response = requests.get("https://librespeed.org/backend/servers.php")
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error fetching servers: {response.status_code}")
+        return []
 
 def bufferbloat_test(server):
     download_speeds = []
@@ -47,6 +51,10 @@ def bufferbloat_test(server):
 
 def main():
     servers = get_librespeed_servers()
+    if not servers:
+        print("No servers found. Exiting...")
+        return
+    
     print("Available servers:")
     for i, server in enumerate(servers):
         print(f"{i}: {server['name']} ({server['url']})")
