@@ -38,12 +38,29 @@ def run_dns_test(dns_servers):
             results[dns_server] = str(e)
     return results
 
-def display_speedtest_results(download_speed):
+def display_speedtest_results(download_speed, upload_speed):
     download_speed_kbps = download_speed / 1000  # Convert to kbps
-    results = {}
+    upload_speed_kbps = upload_speed / 1000  # Convert to kbps
+    download_results = {}
+    upload_results = {}
+    
+    # Download Speed Percentage Results (80% to 90% in 5% increments)
+    for percent in range(80, 91, 5):
+        download_results[f"{percent}%"] = f"{download_speed_kbps * (percent / 100):.2f} kbps"
+
+    # Upload Speed Percentage Results (80% to 90% in 5% increments)
+    for percent in range(80, 91, 5):
+        upload_results[f"{percent}%"] = f"{upload_speed_kbps * (percent / 100):.2f} kbps"
+
+    # Download Speed Decreased Results (90% to 80% in 5% decrements)
     for percent in range(90, 79, -5):
-        results[f"{percent}%"] = f"{download_speed_kbps * (percent / 100):.2f} kbps"
-    return results
+        download_results[f"{percent}%"] = f"{download_speed_kbps * (percent / 100):.2f} kbps"
+
+    # Upload Speed Decreased Results (90% to 80% in 5% decrements)
+    for percent in range(90, 79, -5):
+        upload_results[f"{percent}%"] = f"{upload_speed_kbps * (percent / 100):.2f} kbps"
+
+    return download_results, upload_results
 
 def check_internet_connection():
     try:
@@ -76,7 +93,8 @@ def main():
         "Download Speed": f"{download_speed_mbps:.2f} Mbps ({download_speed:.2f} bps)",
         "Upload Speed": f"{upload_speed_mbps:.2f} Mbps ({upload_speed:.2f} bps)",
         "Latency": f"{latency:.2f} ms",
-        "Speed Test Percentage Results": display_speedtest_results(download_speed)
+        "Download Speed Results": display_speedtest_results(download_speed, upload_speed)[0],
+        "Upload Speed Results": display_speedtest_results(download_speed, upload_speed)[1]
     }
 
     print(json.dumps(speedtest_results, indent=4))
