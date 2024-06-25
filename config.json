@@ -1,6 +1,0 @@
-{
-    "dnsServers": ["8.8.8.8", "1.1.1.1", "9.9.9.9"],
-    "searchEngines": ["google.com", "bing.com", "duckduckgo.com"],
-    "gameServers": ["csgo.com", "leagueoflegends.com", "dota2.com"],
-    "bandwidth": 100000  // Bant genişliği kbps cinsinden
-}
