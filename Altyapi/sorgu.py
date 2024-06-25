@@ -1,12 +1,16 @@
 import json
+import os
+import tempfile
+import webbrowser
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from json2html import json2html
 
 bbk = "0000000000"
 url_bbk = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
 
-def check_port_status():
+def fetch_json_data():
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
@@ -25,43 +29,45 @@ def check_port_status():
 
         if not json_data_str:
             print("JSON verisi alınamadı.")
-            return
+            return None
 
-        json_data = json.loads(json_data_str)
-
-        port_value = json_data.get('6', {}).get('flexList', {}).get('flexList', [])[2].get('value', '')
-        error_code = json_data.get('6', {}).get('hataKod', '')
-        message = json_data.get('6', {}).get('hataMesaj', '')
-
-        port_status = 'VAR' if port_value == '1' else 'YOK'
-
-        now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-
-        log_message = f"[{current_time}] Port Durumu: {port_status}, Hata Kodu: {error_code}, Mesaj: {message}"
-        print(log_message)
-
-        html_content = f"""
-        <html>
-        <head><title>Port Durumu</title></head>
-        <body>
-        <h2>Port Durumu Bilgileri</h2>
-        <p>Port Durumu: {port_status}</p>
-        <p>Hata Kodu: {error_code}</p>
-        <p>Mesaj: {message}</p>
-        </body>
-        </html>
-        """
-
-        filename = f"port_status_{current_time}.html"
-        with open(filename, 'w', encoding='utf-8') as file:
-            file.write(html_content)
-            print(f"HTML dosyası kaydedildi: {filename}")
+        return json.loads(json_data_str)
 
     except Exception as e:
         print(f"Hata: {e}")
+        return None
 
     finally:
         driver.quit()
 
-check_port_status()
+def save_and_open_html(json_data):
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+    html_content = f"""
+    <html>
+    <head><title>JSON Verisi</title></head>
+    <body>
+    <h2>JSON Verisi</h2>
+    {json2html.convert(json=json_data)}
+    </body>
+    </html>
+    """
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_file:
+        tmp_file.write(html_content.encode('utf-8'))
+        tmp_file_path = tmp_file.name
+        print(f"HTML dosyası kaydedildi: {tmp_file_path}")
+
+    webbrowser.open(f"file://{tmp_file_path}")
+
+    input("HTML dosyasını kapatmak için Enter'a basın...")
+    os.remove(tmp_file_path)
+    print(f"HTML dosyası silindi: {tmp_file_path}")
+
+json_data = fetch_json_data()
+
+if json_data:
+    save_and_open_html(json_data)
+else:
+    print("JSON verisi alınamadı veya işlenemedi.")
