@@ -2,6 +2,8 @@ import subprocess
 import time
 import speedtest
 import dns.resolver
+import json
+from datetime import datetime
 
 def run_speedtest():
     st = speedtest.Speedtest()
@@ -21,45 +23,95 @@ def run_traceroute_test(host):
     result = subprocess.run(["traceroute", host], capture_output=True, text=True)
     return result.stdout
 
-def run_dns_test(dns_server):
-    resolver = dns.resolver.Resolver()
-    resolver.nameservers = [dns_server]
-    start_time = time.time()
-    try:
-        resolver.resolve('google.com')
-        end_time = time.time()
-        query_time = end_time - start_time
-        return query_time
-    except Exception as e:
-        return str(e)
+def run_dns_test(dns_servers):
+    results = {}
+    for dns_server in dns_servers:
+        resolver = dns.resolver.Resolver()
+        resolver.nameservers = [dns_server]
+        start_time = time.time()
+        try:
+            resolver.resolve('google.com')
+            end_time = time.time()
+            query_time = end_time - start_time
+            results[dns_server] = query_time
+        except Exception as e:
+            results[dns_server] = str(e)
+    return results
 
 def display_speedtest_results(download_speed):
     download_speed_kbps = download_speed / 1000  # Convert to kbps
+    results = {}
     for percent in range(90, 79, -5):
-        print(f"{percent}% of download speed: {download_speed_kbps * (percent / 100):.2f} kbps")
+        results[f"{percent}%"] = f"{download_speed_kbps * (percent / 100):.2f} kbps"
+    return results
+
+def check_internet_connection():
+    try:
+        response = subprocess.run(["ping", "-c", "1", "8.8.8.8"], capture_output=True, text=True)
+        if response.returncode == 0:
+            return "Connected"
+        else:
+            return "Disconnected"
+    except Exception as e:
+        return f"Error: {e}"
+
+def save_results_to_file(results, filename="network_test_results.json"):
+    with open(filename, "w") as file:
+        json.dump(results, file, indent=4)
 
 def main():
+    start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(f"Test started at: {start_time}")
+    
+    # Check Internet Connection
+    internet_status = check_internet_connection()
+    print(f"Internet Connection Status: {internet_status}")
+
+    # Run Speedtest
     download_speed, upload_speed, latency = run_speedtest()
     download_speed_mbps = download_speed / 1_000_000  # Convert to Mbps
     upload_speed_mbps = upload_speed / 1_000_000  # Convert to Mbps
 
-    print(f"Download Speed: {download_speed_mbps:.2f} Mbps ({download_speed:.2f} bps)")
-    print(f"Upload Speed: {upload_speed_mbps:.2f} Mbps ({upload_speed:.2f} bps)")
-    print(f"Latency: {latency:.2f} ms")
+    speedtest_results = {
+        "Download Speed": f"{download_speed_mbps:.2f} Mbps ({download_speed:.2f} bps)",
+        "Upload Speed": f"{upload_speed_mbps:.2f} Mbps ({upload_speed:.2f} bps)",
+        "Latency": f"{latency:.2f} ms",
+        "Speed Test Percentage Results": display_speedtest_results(download_speed)
+    }
 
-    display_speedtest_results(download_speed)
+    print(json.dumps(speedtest_results, indent=4))
 
+    # Run Ping Test
     host = "8.8.8.8"
     print(f"Ping Test to {host}:")
-    print(run_ping_test(host))
+    ping_results = run_ping_test(host)
+    print(ping_results)
 
+    # Run Traceroute Test
     print(f"Traceroute Test to {host}:")
-    print(run_traceroute_test(host))
+    traceroute_results = run_traceroute_test(host)
+    print(traceroute_results)
 
-    dns_server = "8.8.8.8"
-    print(f"DNS Test to {dns_server}:")
-    dns_time = run_dns_test(dns_server)
-    print(f"DNS query time: {dns_time:.2f} seconds")
+    # Run DNS Test
+    dns_servers = ["8.8.8.8", "8.8.4.4", "1.1.1.1"]
+    print(f"DNS Test to servers: {', '.join(dns_servers)}")
+    dns_results = run_dns_test(dns_servers)
+    print(json.dumps(dns_results, indent=4))
+
+    end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(f"Test ended at: {end_time}")
+
+    # Save results to file
+    results = {
+        "start_time": start_time,
+        "end_time": end_time,
+        "internet_status": internet_status,
+        "speedtest_results": speedtest_results,
+        "ping_results": ping_results,
+        "traceroute_results": traceroute_results,
+        "dns_results": dns_results
+    }
+    save_results_to_file(results)
 
 if __name__ == "__main__":
     main()
