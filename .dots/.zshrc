@@ -72,7 +72,7 @@ alias fgrep='fgrep --color=auto'
 # Network
 alias wget='wget -c'
 alias curl='curl -O'
-alias myip='curl ipinfo.io/ip'
+alias myip='wget -qO- ifconfig.io/ip ; echo'
 
 # System info
 alias df='df -h'
