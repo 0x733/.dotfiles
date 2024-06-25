@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import json
 
 bbk = "0000000000"
 url_bbk = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
@@ -40,12 +41,15 @@ def check_port_status(driver):
         driver.get(url_bbk)
 
         # JavaScript ile JSON verisini al
-        json_data = driver.execute_script("""
+        json_data_str = driver.execute_script("""
             return fetch(arguments[0])
                 .then(response => response.json())
                 .then(data => JSON.stringify(data))
                 .catch(error => console.error('Error:', error));
         """, url_bbk)
+
+        # String formatındaki JSON verisini Python dictionary'sine dönüştür
+        json_data = json.loads(json_data_str)
 
         # Port durumu bilgilerini al
         port_value = json_data.get('6', {}).get('flexList', {}).get('flexList', [])[2].get('value', '')
