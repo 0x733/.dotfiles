@@ -43,8 +43,8 @@ def main():
     download_speed_mbps = download_speed / 1_000_000  # Convert to Mbps
     upload_speed_mbps = upload_speed / 1_000_000  # Convert to Mbps
 
-    print(f"Original Download Speed: {download_speed_mbps:.2f} Mbps ({download_speed:.2f} bps)")
-    print(f"Original Upload Speed: {upload_speed_mbps:.2f} Mbps ({upload_speed:.2f} bps)")
+    print(f"Download Speed: {download_speed_mbps:.2f} Mbps ({download_speed:.2f} bps)")
+    print(f"Upload Speed: {upload_speed_mbps:.2f} Mbps ({upload_speed:.2f} bps)")
     print(f"Latency: {latency:.2f} ms")
 
     display_speedtest_results(download_speed)
