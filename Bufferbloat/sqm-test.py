@@ -70,9 +70,17 @@ def choose_server():
         return find_best_server()
 
 def get_server_list():
-    """Speedtest sunucularını listeler ve döndürür."""
-    result = subprocess.run(["speedtest-cli", "--list", "--json"], capture_output=True, text=True)
-    return json.loads(result.stdout)["servers"]
+     """Speedtest sunucularını listeler ve döndürür."""
+     result = subprocess.run(["speedtest-cli", "--list", "--json"], capture_output=True, text=True)
+     try:
+         json_data = json.loads(result.stdout)
+         if "servers" in json_data:
+             return json_data["servers"]
+         else:
+             raise ValueError("Sunucu listesi bulunamadı.")
+     except json.JSONDecodeError as e:
+         print(f"Hata: Geçersiz JSON çıktısı: {e}")
+         return None  # Veya boş bir liste döndürebilirsiniz ([])
 
 def find_best_server():
     """Ping sürelerine göre en iyi sunucuyu bulur."""
