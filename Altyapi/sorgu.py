@@ -39,8 +39,13 @@ def check_port_status(driver):
     try:
         driver.get(url_bbk)
 
-        # JSON verisini al
-        json_data = driver.execute_script("return JSON.stringify(arguments[0].getElementsByTagName('body')[0].innerText);")
+        # JavaScript ile JSON verisini al
+        json_data = driver.execute_script("""
+            return fetch(arguments[0])
+                .then(response => response.json())
+                .then(data => JSON.stringify(data))
+                .catch(error => console.error('Error:', error));
+        """, url_bbk)
 
         # Port durumu bilgilerini al
         port_value = json_data.get('6', {}).get('flexList', {}).get('flexList', [])[2].get('value', '')
