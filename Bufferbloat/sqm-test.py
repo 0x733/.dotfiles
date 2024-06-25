@@ -61,6 +61,10 @@ def choose_server():
     choice = input("Sunucu seçmek ister misiniz? (e/h): ")
     if choice.lower() == "e":
         servers = get_server_list()
+        if not servers:
+            print("Sunucu listesi alınamadı. Lütfen daha sonra tekrar deneyin.")
+            return None
+
         for i, server in enumerate(servers):
             print(f"{i+1}. {server['name']} ({server['sponsor']}) - {server['country']}")
         server_index = int(input("Sunucu numarasını girin: ")) - 1
@@ -70,17 +74,33 @@ def choose_server():
         return find_best_server()
 
 def get_server_list():
-     """Speedtest sunucularını listeler ve döndürür."""
-     result = subprocess.run(["speedtest-cli", "--list", "--json"], capture_output=True, text=True)
-     try:
-         json_data = json.loads(result.stdout)
-         if "servers" in json_data:
-             return json_data["servers"]
-         else:
-             raise ValueError("Sunucu listesi bulunamadı.")
-     except json.JSONDecodeError as e:
-         print(f"Hata: Geçersiz JSON çıktısı: {e}")
-         return None  # Veya boş bir liste döndürebilirsiniz ([])
+    """Speedtest sunucularını listeler ve döndürür."""
+    try:
+        result = subprocess.run(
+            ["speedtest-cli", "--list"],
+            capture_output=True,
+            text=True,
+        )
+
+        # Çıktıyı ayrıştırma (parsing)
+        servers = []
+        for line in result.stdout.splitlines()[1:]:  # İlk satırı atla (başlık)
+            parts = line.split()
+            if len(parts) >= 6:
+                server_id, sponsor, name, country, distance, latency, _ = parts
+                servers.append({
+                    "id": server_id,
+                    "sponsor": sponsor,
+                    "name": name,
+                    "country": country,
+                    "distance": distance,
+                    "latency": latency,
+                })
+        return servers
+
+    except subprocess.CalledProcessError as e:
+        print(f"Hata: Sunucu listesi alınamadı: {e}")
+        return []
 
 def find_best_server():
     """Ping sürelerine göre en iyi sunucuyu bulur."""
@@ -138,6 +158,10 @@ def save_results(results, filename="hiz_testi_sonuclari.json"):
 def main():
     """Ana fonksiyon: Hız testi yapar, sonuçları analiz eder ve kaydeder."""
     server_id = choose_server()
+    if server_id is None:
+        print("Hız testi yapılamıyor. Lütfen sunucu seçiminizi kontrol edin veya daha sonra tekrar deneyin.")
+        return
+
     results = run_speedtest(server_id)
     if results:
         analyze_results(results)
