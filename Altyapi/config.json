@@ -1,6 +1,0 @@
-{
-    "bbk": "0000000000",
-    "check_interval": 60,
-    "max_retries": 3,
-    "retry_delay": 5
-}
