@@ -4,15 +4,27 @@
 echo "En uygun speedtest sunucusunu bulma..."
 BEST_SERVER=$(speedtest-go --list | grep -i 'best server' | awk '{print $3}')
 
+# Eğer en uygun sunucu bulunamazsa hata verelim
+if [ -z "$BEST_SERVER" ]; then
+  echo "En uygun speedtest sunucusu bulunamadı. Lütfen tekrar deneyin veya speedtest-go komutunu kontrol edin."
+  exit 1
+fi
+
 # Hız testi yapılıyor...
 echo "Hız testi yapılıyor..."
 SPEEDTEST_OUTPUT=$(speedtest-go --server $BEST_SERVER)
+
+# Eğer hız testi çıktısı alınamazsa hata verelim
+if [ -z "$SPEEDTEST_OUTPUT" ]; then
+  echo "Hız testi sonucu alınamadı. Lütfen tekrar deneyin veya speedtest-go komutunu kontrol edin."
+  exit 1
+fi
 
 # Download ve Upload hızlarını alıyoruz
 DOWNLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | awk '/Download/ {print $2}')
 UPLOAD_SPEED=$(echo "$SPEEDTEST_OUTPUT" | awk '/Upload/ {print $2}')
 
-# Eğer çıktıda "Download" ve "Upload" hızları yoksa hata mesajı verelim
+# Eğer Download veya Upload hızları alınamazsa hata verelim
 if [ -z "$DOWNLOAD_SPEED" ] || [ -z "$UPLOAD_SPEED" ]; then
   echo "Hız testi sonucu alınamadı. Lütfen tekrar deneyin veya speedtest-go komutunu kontrol edin."
   exit 1
