@@ -6,7 +6,7 @@ from json2html import json2html
 
 bbk = "0000000000"
 url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
-end_time = datetime.now() + timedelta(seconds=10)
+end_time = datetime.now() + timedelta(seconds=5)  # 5 saniye sonra sonlanacak
 
 def check_port_status():
     try:
@@ -21,13 +21,13 @@ def check_port_status():
         port_status = 'VAR' if port_value == '1' else 'YOK'
 
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
         log_message = f"[{current_time}] Port Durumu: {port_status}, Hata Kodu: {error_code}, Mesaj: {message}"
         print(log_message)
 
-        # JSON verisini HTML'e dönüştür
-        html_table = json2html.convert(json=json_data)
+        # JSON verisini HTML'e dönüştür (daha düzenli)
+        html_table = json2html.convert(json=json_data, indent=2)
 
         # HTML tablosunu dosyaya yaz
         filename = f"port_status_{current_time}.html"
@@ -37,19 +37,19 @@ def check_port_status():
 
     except requests.exceptions.RequestException as e:
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{current_time}] İstek hatası: {e}")
     except json.JSONDecodeError as e:
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{current_time}] JSON ayrıştırma hatası: {e}")
     except Exception as e:
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{current_time}] Beklenmeyen hata: {e}")
 
 while datetime.now() < end_time:
     check_port_status()
-    time.sleep(60)
+    time.sleep(1)  # Her saniye kontrol et
 
 print("Program sonlandı.")
