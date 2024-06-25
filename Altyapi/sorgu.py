@@ -1,12 +1,10 @@
 import requests
 import json
-import time
 from datetime import datetime, timedelta
 from json2html import json2html
 
 bbk = "0000000000"
 url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
-end_time = datetime.now() + timedelta(seconds=5)  # 5 saniye sonra sonlanacak
 
 def check_port_status():
     try:
@@ -21,38 +19,36 @@ def check_port_status():
         port_status = 'VAR' if port_value == '1' else 'YOK'
 
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
         log_message = f"[{current_time}] Port Durumu: {port_status}, Hata Kodu: {error_code}, Mesaj: {message}"
         print(log_message)
 
-        # JSON verisini düzgün bir şekilde formatla
-        formatted_json = json.dumps(json_data, indent=2)
+        # JSON verisini HTML'e dönüştür
+        html_table = json2html.convert(json=json_data)
 
-        # Düzgün JSON formatını HTML'e dönüştür
-        html_table = json2html.convert(json=formatted_json)
-
-        # HTML tablosunu dosyaya yaz
+        # HTML dosyasını kaydet
         filename = f"port_status_{current_time}.html"
         with open(filename, 'w', encoding='utf-8') as file:
             file.write(html_table)
             print(f"HTML dosyası kaydedildi: {filename}")
 
+        return True  # Başarılı bir şekilde işlendiği bilgisini döndür
+
     except requests.exceptions.RequestException as e:
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
         print(f"[{current_time}] İstek hatası: {e}")
     except json.JSONDecodeError as e:
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
         print(f"[{current_time}] JSON ayrıştırma hatası: {e}")
     except Exception as e:
         now = datetime.now()
-        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
         print(f"[{current_time}] Beklenmeyen hata: {e}")
 
-while datetime.now() < end_time:
-    check_port_status()
-    time.sleep(1)  # Her saniye kontrol et
+    return False  # Hata durumunda False döndür
 
-print("Program sonlandı.")
+if check_port_status():
+    print("Program sonlandı.")
