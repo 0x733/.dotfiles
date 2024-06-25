@@ -1,5 +1,4 @@
 import requests
-import bs4
 import json
 import time
 from datetime import datetime, timedelta
@@ -12,9 +11,7 @@ def check_port_status():
     try:
         response = requests.get(url)
         response.raise_for_status()
-        soup = bs4.BeautifulSoup(response.text, 'html.parser')
-        
-        json_data = json.loads(str(soup))
+        json_data = response.json()
 
         if '6' in json_data and 'flexList' in json_data['6'] and 'flexList' in json_data['6']['flexList'] and len(json_data['6']['flexList']['flexList']) > 2:
             port_value = json_data['6']['flexList']['flexList'][2]['value']
