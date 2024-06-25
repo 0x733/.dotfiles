@@ -58,6 +58,13 @@ packet_loss_test() {
 # Bufferbloat testi
 bufferbloat_test() {
   echo "Bufferbloat testi: netperf ile"
+  
+  # Netserver'ın çalıştığını kontrol et ve başlat
+  if ! pgrep netserver > /dev/null; then
+    echo "Netserver başlatılıyor..."
+    sudo netserver
+  fi
+  
   netperf -H localhost -l 60 -- -P 0 -D 1 -o THROUGHPUT,MEAN_LATENCY
 }
 
