@@ -4,7 +4,7 @@ import json
 def find_best_server():
     try:
         # En uygun sunucuyu bulma
-        result = subprocess.run(['speedtest-go', '--list'], capture_output=True, text=True)
+        result = subprocess.run(['/usr/bin/speedtest-go', '--list'], capture_output=True, text=True)
         output_lines = result.stdout.strip().split('\n')
         
         best_server = None
@@ -23,7 +23,7 @@ def find_best_server():
         if best_server:
             return best_server
         else:
-            print("En uygun speedtest sunucusu bulunamadı. Lütfen tekrar deneyin veya speedtest-go komutunu kontrol edin.")
+            print("En uygun speedtest sunucusu bulunamadı. Lütfen tekrar deneyin veya /usr/bin/speedtest-go komutunu kontrol edin.")
             return None
     
     except subprocess.CalledProcessError as e:
@@ -33,7 +33,7 @@ def find_best_server():
 def run_speedtest(server_id):
     try:
         # Hız testi yapma
-        result = subprocess.run(['speedtest-go', '--server', server_id], capture_output=True, text=True)
+        result = subprocess.run(['/usr/bin/speedtest-go', '--server', server_id], capture_output=True, text=True)
         speedtest_output = result.stdout.strip()
         
         # Parse the speedtest output
