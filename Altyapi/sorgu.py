@@ -19,7 +19,7 @@ def scrape_table(driver):
         driver.get(url_scrape)
 
         # Bekleme süresi ekleyerek web sitesinin tam olarak yüklenmesini sağla
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "tt-tab")))
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CLASS_NAME, "tt-tab")))
 
         # 'tt-tab' class'ına sahip tabloyu bul
         table = driver.find_element(By.CLASS_NAME, "tt-tab")
@@ -50,6 +50,9 @@ def check_port_status(driver):
 
         # String formatındaki JSON verisini Python dictionary'sine dönüştür
         json_data = json.loads(json_data_str)
+
+        # JSON verisini konsola yazdırarak kontrol edelim
+        print("JSON Data:", json_data)
 
         # Port durumu bilgilerini al
         port_value = json_data.get('6', {}).get('flexList', {}).get('flexList', [])[2].get('value', '')
