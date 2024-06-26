@@ -1,73 +1,73 @@
-import json
-import os
-import tempfile
+import requests
 import webbrowser
-from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from json2html import json2html
+import json
+import tempfile
+import os
 
-bbk = "0000000000"
-url_bbk = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk}&datatype=checkAddress"
+def sorgula_ve_html_olustur(bbk_kod):
+    """
+    Verilen BBK kodunu kullanarak altyapı sorgusu yapar, flexList'i ayrıştırır ve sonucu HTML formatında gösterir.
 
-def fetch_json_data():
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-
-    driver = webdriver.Chrome(options=options)
-
-    try:
-        driver.get(url_bbk)
-        json_data_str = driver.execute_script("""
-            return fetch(arguments[0])
-                .then(response => response.json())
-                .then(data => JSON.stringify(data))
-                .catch(error => {console.error('Fetch error:', error); return null;});
-        """, url_bbk)
-
-        if not json_data_str:
-            print("JSON verisi alınamadı.")
-            return None
-
-        return json.loads(json_data_str)
-
-    except Exception as e:
-        print(f"Hata: {e}")
-        return None
-
-    finally:
-        driver.quit()
-
-def save_and_open_html(json_data):
-    now = datetime.now()
-    current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-
-    html_content = f"""
-    <html>
-    <head><title>JSON Verisi</title></head>
-    <body>
-    <h2>JSON Verisi</h2>
-    {json2html.convert(json=json_data)}
-    </body>
-    </html>
+    Args:
+        bbk_kod (str): Sorgulanacak bina bilgi kodu.
     """
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_file:
-        tmp_file.write(html_content.encode('utf-8'))
-        tmp_file_path = tmp_file.name
-        print(f"HTML dosyası kaydedildi: {tmp_file_path}")
+    sorgu_url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk_kod}&datatype=checkAddress"
+    yanit = requests.get(sorgu_url)
 
-    webbrowser.open(f"file://{tmp_file_path}")
+    if yanit.status_code == 200:
+        veri = yanit.json()
 
-    input("HTML dosyasını kapatmak için Enter'a basın...")
-    os.remove(tmp_file_path)
-    print(f"HTML dosyası silindi: {tmp_file_path}")
+        # flexList'i ayrıştır
+        flex_list_verisi = veri.get("flexList", [])
 
-json_data = fetch_json_data()
+        # HTML oluşturma
+        html_icerik = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>BBK Sorgulama Sonucu</title>
+            <style>
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid black; padding: 8px; text-align: left; }
+            </style>
+        </head>
+        <body>
+            <h1>BBK Sorgulama Sonucu</h1>
+            <h2>flexList Verisi</h2>
+            <table>
+                <tr>
+                    <th>Anahtar</th>
+                    <th>Değer</th>
+                </tr>
+        """
 
-if json_data:
-    save_and_open_html(json_data)
-else:
-    print("JSON verisi alınamadı veya işlenemedi.")
+        for item in flex_list_verisi:
+            for key, value in item.items():
+                html_icerik += f"<tr><td>{key}</td><td>{value}</td></tr>"
+
+        html_icerik += """
+            </table>
+        </body>
+        </html>
+        """
+
+        # Geçici HTML dosyası oluştur ve yaz
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as gecici_dosya:
+            gecici_dosya.write(html_icerik.encode("utf-8"))
+
+        # HTML dosyasını tarayıcıda aç
+        webbrowser.open(gecici_dosya.name)
+
+        # Tarayıcı kapatıldığında HTML dosyasını sil
+        while True:
+            if not webbrowser.get().windows:
+                os.remove(gecici_dosya.name)
+                break
+
+    else:
+        print("Sorgulama başarısız oldu. Lütfen BBK kodunu kontrol edin veya daha sonra tekrar deneyin.")
+
+# Kullanıcıdan BBK kodunu al
+bbk_kod = input("Lütfen sorgulamak istediğiniz BBK kodunu girin: ")
+sorgula_ve_html_olustur(bbk_kod)
