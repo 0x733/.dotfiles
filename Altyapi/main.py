@@ -1,72 +1,29 @@
 import requests
-import webbrowser
 import json
-import tempfile
-import os
-import time
 
-def sorgula_ve_html_olustur(bbk_kod):
-    """
-    Verilen BBK kodunu kullanarak altyapı sorgusu yapar, flexList'i ayrıştırır ve sonucu HTML formatında gösterir.
+# Kullanıcıdan bbk kodunu al
+bbk_value = input("BBK kodunu girin: ")
+url = f'https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk_value}&datatype=checkAddress'
 
-    Args:
-        bbk_kod (str): Sorgulanacak bina bilgi kodu.
-    """
+# GET isteği gönder
+response = requests.get(url)
 
-    sorgu_url = f"https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk_kod}&datatype=checkAddress"
-    yanit = requests.get(sorgu_url)
+# İstek başarılı mı kontrol et
+if response.status_code == 200:
+    data = response.json()
+    
+    for key, value in data.items():
+        print(f"\nAdres {key}:")
+        if 'flexList' in value and isinstance(value['flexList'], dict) and 'flexList' in value['flexList']:
+            flex_list = value['flexList']['flexList']
+            if isinstance(flex_list, list):
+                for item in flex_list:
+                    if isinstance(item, dict) and 'name' in item and 'value' in item:
+                        print(f"{item['name']}: {item['value']}")
+        if 'hataKod' in value:
+            print(f"Hata Kodu: {value['hataKod']}")
+        if 'hataMesaj' in value:
+            print(f"Hata Mesajı: {value['hataMesaj']}")
+else:
+    print(f'İstek başarısız oldu. HTTP Durum Kodu: {response.status_code}')
 
-    if yanit.status_code == 200:
-        veri = yanit.json()
-
-        # flexList'i ayrıştır
-        flex_list_verisi = veri.get("flexList", [])
-
-        # HTML oluşturma
-        html_icerik = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>BBK Sorgulama Sonucu</title>
-            <style>
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid black; padding: 8px; text-align: left; }
-            </style>
-        </head>
-        <body>
-            <h1>BBK Sorgulama Sonucu</h1>
-            <h2>flexList Verisi</h2>
-            <table>
-                <tr>
-                    <th>Anahtar</th>
-                    <th>Değer</th>
-                </tr>
-        """
-
-        for item in flex_list_verisi:
-            for key, value in item.items():
-                html_icerik += f"<tr><td>{key}</td><td>{value}</td></tr>"
-
-        html_icerik += """
-            </table>
-        </body>
-        </html>
-        """
-
-        # Geçici HTML dosyası oluştur ve yaz
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as gecici_dosya:
-            gecici_dosya.write(html_icerik.encode("utf-8"))
-
-        # HTML dosyasını tarayıcıda aç
-        webbrowser.open(gecici_dosya.name)
-
-        # Tarayıcıyı kapatmak için bir süre bekle (örneğin 5 saniye)
-        time.sleep(5)  
-        os.remove(gecici_dosya.name)
-
-    else:
-        print("Sorgulama başarısız oldu. Lütfen BBK kodunu kontrol edin veya daha sonra tekrar deneyin.")
-
-# Kullanıcıdan BBK kodunu al
-bbk_kod = input("Lütfen sorgulamak istediğiniz BBK kodunu girin: ")
-sorgula_ve_html_olustur(bbk_kod)
