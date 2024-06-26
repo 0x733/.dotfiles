@@ -1,74 +1,28 @@
 import speedtest
-import json
-from datetime import datetime
 
-def hiz_testi_yap():
+def main():
     st = speedtest.Speedtest()
     st.download()
     st.upload()
-    st_sonuclari = st.results.dict()
-    indirme_hizi_mbps = st_sonuclari["download"] / 1_000_000  # Mbps'ye dönüştürme
-    yukleme_hizi_mbps = st_sonuclari["upload"] / 1_000_000  # Mbps'ye dönüştürme
-    gecikme = st_sonuclari["ping"]
-    return indirme_hizi_mbps, yukleme_hizi_mbps, gecikme
-
-def hiz_testi_sonuclarini_goster(indirme_hizi_mbps, yukleme_hizi_mbps):
-    indirme_hizi_kbps = indirme_hizi_mbps * 1_000  # kbps'ye dönüştürme
-    yukleme_hizi_kbps = yukleme_hizi_mbps * 1_000  # kbps'ye dönüştürme
-
-    sonuclar = {
-        "İndirme Hızı": {
-            "Mbps": f"{indirme_hizi_mbps:.2f}",
-            "Azaltılmış": {},
-            "Artırılmış": {}
-        },
-        "Yükleme Hızı": {
-            "Mbps": f"{yukleme_hizi_mbps:.2f}",
-            "Azaltılmış": {},
-            "Artırılmış": {}
-        }
-    }
-
-    # İndirme Hızı Yüzde Sonuçları (80% ile 90% arası, %5 artışlarla)
-    for yuzde in range(80, 91, 5):
-        sonuclar["İndirme Hızı"]["Azaltılmış"][f"{yuzde}%"] = f"{indirme_hizi_mbps * (yuzde / 100):.2f} Mbps"
-        sonuclar["İndirme Hızı"]["Artırılmış"][f"{yuzde}%"] = f"{indirme_hizi_mbps * ((100 + yuzde) / 100):.2f} Mbps"
-
-    # Yükleme Hızı Yüzde Sonuçları (80% ile 90% arası, %5 artışlarla)
-    for yuzde in range(80, 91, 5):
-        sonuclar["Yükleme Hızı"]["Azaltılmış"][f"{yuzde}%"] = f"{yukleme_hizi_mbps * (yuzde / 100):.2f} Mbps"
-        sonuclar["Yükleme Hızı"]["Artırılmış"][f"{yuzde}%"] = f"{yukleme_hizi_mbps * ((100 + yuzde) / 100):.2f} Mbps"
-
-    # İndirme Hızı Yüzde Sonuçları (80% ile 90% arası, %5 artışlarla) kbps cinsinden
-    for yuzde in range(80, 91, 5):
-        sonuclar["İndirme Hızı"]["Azaltılmış"][f"{yuzde}% kbps"] = f"{indirme_hizi_kbps * (yuzde / 100):.2f} kbps"
-        sonuclar["İndirme Hızı"]["Artırılmış"][f"{yuzde}% kbps"] = f"{indirme_hizi_kbps * ((100 + yuzde) / 100):.2f} kbps"
-
-    # Yükleme Hızı Yüzde Sonuçları (80% ile 90% arası, %5 artışlarla) kbps cinsinden
-    for yuzde in range(80, 91, 5):
-        sonuclar["Yükleme Hızı"]["Azaltılmış"][f"{yuzde}% kbps"] = f"{yukleme_hizi_kbps * (yuzde / 100):.2f} kbps"
-        sonuclar["Yükleme Hızı"]["Artırılmış"][f"{yuzde}% kbps"] = f"{yukleme_hizi_kbps * ((100 + yuzde) / 100):.2f} kbps"
-
-    return sonuclar
-
-def ana_program():
-    baslangic_zamani = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"Test başladı: {baslangic_zamani}")
-
-    # Hız testini çalıştır
-    indirme_hizi_mbps, yukleme_hizi_mbps, gecikme = hiz_testi_yap()
-
-    hiz_testi_sonuclari = {
-        "İndirme Hızı": f"{indirme_hizi_mbps:.2f} Mbps",
-        "Yükleme Hızı": f"{yukleme_hizi_mbps:.2f} Mbps",
-        "Gecikme": f"{gecikme:.2f} ms",
-        **hiz_testi_sonuclarini_goster(indirme_hizi_mbps, yukleme_hizi_mbps)
-    }
-
-    print(json.dumps(hiz_testi_sonuclari, indent=4, ensure_ascii=False))
-
-    bitis_zamani = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"Test bitti: {bitis_zamani}")
+    
+    download_speed_mbps = st.results.download / 1e6  # Mbps cinsinden download hızı
+    upload_speed_mbps = st.results.upload / 1e6  # Mbps cinsinden upload hızı
+    
+    print(f"Mevcut Download Hızı: {download_speed_mbps:.2f} Mbps")
+    print(f"Mevcut Upload Hızı: {upload_speed_mbps:.2f} Mbps")
+    
+    download_speed_kbps = download_speed_mbps * 1000  # kbps cinsinden download hızı
+    upload_speed_kbps = upload_speed_mbps * 1000  # kbps cinsinden upload hızı
+    
+    download_speed_adjusted_kbps = download_speed_kbps * 0.9  # %10 azaltılmış download hızı
+    upload_speed_adjusted_kbps = upload_speed_kbps * 0.9  # %10 azaltılmış upload hızı
+    
+    print(f"SQM için Ayarlanan Download Hızı: {download_speed_adjusted_kbps:.0f} kbps")
+    print(f"SQM için Ayarlanan Upload Hızı: {upload_speed_adjusted_kbps:.0f} kbps")
+    
+    print("\nLütfen aşağıdaki değerleri OpenWRT cihazınıza manuel olarak girin:")
+    print(f"Download Hızı: {int(download_speed_adjusted_kbps)} kbps")
+    print(f"Upload Hızı: {int(upload_speed_adjusted_kbps)} kbps")
 
 if __name__ == "__main__":
-    ana_program()
+    main()
