@@ -3,10 +3,12 @@ import webbrowser
 import json
 import tempfile
 import os
+import time
 
 def sorgula_ve_html_olustur(bbk_kod):
     """
     Verilen BBK kodunu kullanarak altyapı sorgusu yapar, flexList'i ayrıştırır ve sonucu HTML formatında gösterir.
+
     Args:
         bbk_kod (str): Sorgulanacak bina bilgi kodu.
     """
@@ -58,11 +60,9 @@ def sorgula_ve_html_olustur(bbk_kod):
         # HTML dosyasını tarayıcıda aç
         webbrowser.open(gecici_dosya.name)
 
-        # Tarayıcı kapatıldığında HTML dosyasını sil
-        while True:
-            if not webbrowser.get().windows:
-                os.remove(gecici_dosya.name)
-                break
+        # Tarayıcıyı kapatmak için bir süre bekle (örneğin 5 saniye)
+        time.sleep(5)  
+        os.remove(gecici_dosya.name)
 
     else:
         print("Sorgulama başarısız oldu. Lütfen BBK kodunu kontrol edin veya daha sonra tekrar deneyin.")
