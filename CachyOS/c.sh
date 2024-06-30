@@ -1,9 +1,21 @@
 #!/bin/bash
 
+uzantilar=(
+    "*.tmp"
+    "*.bak"
+    "*.log"
+    "*.old"
+    "*.swp"
+    "*.cache"
+    "*.crash"
+    "*.gz"
+    "*.xz"
+)
+
 shred_temp_files() {
     echo "Geçici dosyalar güvenli bir şekilde siliniyor..."
-    find /tmp -type f -exec shred -u {} \;
-    find /var/tmp -type f -exec shred -u {} \;
+    sudo find /tmp -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o -name "${uzantilar[2]}" -o -name "${uzantilar[3]}" -o -name "${uzantilar[4]}" -o -name "${uzantilar[5]}" -o -name "${uzantilar[6]}" -o -name "${uzantilar[7]}" -o -name "${uzantilar[8]}" \) -exec shred -u {} \;
+    sudo find /var/tmp -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o -name "${uzantilar[2]}" -o -name "${uzantilar[3]}" -o -name "${uzantilar[4]}" -o -name "${uzantilar[5]}" -o -name "${uzantilar[6]}" -o -name "${uzantilar[7]}" -o -name "${uzantilar[8]}" \) -exec shred -u {} \;
     echo "Geçici dosyalar güvenli bir şekilde silindi."
 }
 
@@ -22,15 +34,18 @@ clean_package_cache() {
 
 remove_orphans() {
     echo "Orphan paketler kaldırılıyor..."
-    sudo pacman -Rns $(pacman -Qtdq) --noconfirm
+    sudo pacman -Rns $(sudo pacman -Qdtq) --noconfirm
     echo "Orphan paketler kaldırıldı."
 }
 
 disk_cleanup() {
     echo "Disk temizliği yapılıyor..."
     sudo rm -rf /var/cache/pacman/pkg/*
-    sudo rm -rf /var/log/*.log
-    echo "Disk temizliği tamamlandı."
+    echo "Pacman paket önbelleği temizlendi."
+    sudo find /var/log -type f \( -name "*.log" \) -exec rm -f {} \;
+    echo "Log dosyaları temizlendi."
+    sudo find / -type f \( -name "${uzantilar[0]}" -o -name "${uzantilar[1]}" -o -name "${uzantilar[2]}" -o -name "${uzantilar[3]}" -o -name "${uzantilar[4]}" -o -name "${uzantilar[5]}" -o -name "${uzantilar[6]}" -o -name "${uzantilar[7]}" -o -name "${uzantilar[8]}" \) -exec rm -f {} \;
+    echo "Belirtilen uzantılara sahip dosyalar temizlendi."
 }
 
 clean_whatsapp_cache() {
@@ -70,3 +85,4 @@ memory_optimization
 system_update
 
 echo "Tüm işlemler tamamlandı."
+
