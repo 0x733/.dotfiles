@@ -3,7 +3,7 @@ install_pacman_apps() {
   local packages=(
     "brave-bin" "mullvad-browser-bin" "onionshare"
     "vlc" "dolphin-emu" "yt-dlp" "starship" "waydroid" 
-    "chatgpt-desktop-bin"
+    "chatgpt-desktop-bin" "ferdium-bin"
   )
   sudo pacman -Sy --noconfirm "${packages[@]}"
 }
