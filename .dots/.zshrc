@@ -87,14 +87,14 @@ alias usage='du -ch --max-depth=1'
 
 # Git
 alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
+alias ga='git add .'
+alias gc='git commit -m "☠"'
+alias gp='git push -u origin main'
 alias gl='git pull'
 alias gco='git checkout'
 alias gb='git branch'
 alias gd='git diff'
-alias gcl='git clone'
+alias gcl='git clone --depth 1'
 
 # Archive operations
 alias tarc='tar -czvf'
