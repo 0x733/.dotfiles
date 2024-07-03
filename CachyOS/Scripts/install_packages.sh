@@ -6,8 +6,4 @@ install_packages() {
     "gvfs-afc" "gvfs-goa" "gvfs-google" "gvfs-gphoto2" "gvfs-nfs" "gvfs-afc"
   )
   sudo pacman -Sy --noconfirm "${packages[@]}"
-
-  echo "AUR paketleri yükleniyor..."
-  local aur_packages=("qt5-styleplugins")
-  paru -Sy --noconfirm "${aur_packages[@]}"
 }
