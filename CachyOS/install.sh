@@ -11,7 +11,6 @@ source "$SCRIPT_DIR/setup_black_arch.sh"
 source "$SCRIPT_DIR/install_packages.sh"
 source "$SCRIPT_DIR/install_pacman_apps.sh"
 source "$SCRIPT_DIR/install_file_viewer.sh"
-source "$SCRIPT_DIR/setup_kvantum_theme.sh"
 source "$SCRIPT_DIR/configure_git.sh"
 source "$SCRIPT_DIR/setup_zsh.sh"
 source "$SCRIPT_DIR/update_user_dirs.sh"
@@ -28,7 +27,6 @@ main() {
   install_packages
   install_pacman_apps
   install_file_viewer
-  setup_kvantum_theme
   configure_git
   setup_zsh
   install_flatpak_whatsapp

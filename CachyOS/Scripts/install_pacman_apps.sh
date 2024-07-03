@@ -3,7 +3,7 @@ install_pacman_apps() {
   local packages=(
     "brave-bin" "librewolf" "onionshare"
     "vlc" "dolphin-emu" "yt-dlp" "starship" "waydroid" 
-    "chatgpt-desktop-bin" "ferdium-bin" "python-pipx"
+    "chatgpt-desktop-bin" "ferdium-bin" "rustdesk"
   )
   sudo pacman -Sy --noconfirm "${packages[@]}"
 }
