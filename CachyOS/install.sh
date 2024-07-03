@@ -1,22 +1,17 @@
 #!/bin/bash
 
 # Script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+SCRIPT_DIR="$HOME/.dotfiles/CachyOS/Scripts"
 
-# Include each module from .dotfiles/CachyOS/Scripts directory
-source "$SCRIPT_DIR/update_system.sh"
-source "$SCRIPT_DIR/configure_hyprland.sh"
-source "$SCRIPT_DIR/setup_chaotic_aur.sh"
-source "$SCRIPT_DIR/setup_black_arch.sh"
-source "$SCRIPT_DIR/install_packages.sh"
-source "$SCRIPT_DIR/install_pacman_apps.sh"
-source "$SCRIPT_DIR/install_file_viewer.sh"
-source "$SCRIPT_DIR/configure_git.sh"
-source "$SCRIPT_DIR/setup_zsh.sh"
-source "$SCRIPT_DIR/update_user_dirs.sh"
-source "$SCRIPT_DIR/setup_fonts.sh"
-source "$SCRIPT_DIR/install_video_dependencies.sh"
-source "$SCRIPT_DIR/sddm.sh"
+# Include each module from .dotfiles/CachyOS/Scripts directory if it exists
+for script in update_system configure_hyprland setup_chaotic_aur setup_black_arch install_packages install_pacman_apps install_file_viewer configure_git setup_zsh update_user_dirs setup_fonts install_video_dependencies sddm; do
+  if [[ -f "$SCRIPT_DIR/$script.sh" ]]; then
+    source "$SCRIPT_DIR/$script.sh"
+  else
+    echo "ERROR: Script not found: $SCRIPT_DIR/$script.sh" >&2
+    exit 1
+  fi
+done
 
 # Main function
 main() {
@@ -40,12 +35,9 @@ main() {
 
 # Check if running as root
 if [[ $(id -u) -eq 0 ]]; then
-  echo "Lütfen bu komut dosyasını root olarak çalıştırmayın. Normal kullanıcı hesabınızı kullanın."
+  echo "Lütfen bu komut dosyasını root olarak çalıştırmayın. Normal kullanıcı hesabınızı kullanın." >&2
   exit 1
 fi
 
 # Run main function
 main
-
-echo "Script başarıyla çalıştı. İşlem tamamlandı."
-
