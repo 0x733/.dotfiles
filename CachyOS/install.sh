@@ -45,9 +45,9 @@ sed -i \
 xdg-user-dirs-update
 
 # Font configuration
-cp "$DOTFILES_DIR/.fonts.conf" "$HOME/"
-cp -r "$DOTFILES_DIR/.fonts" "$HOME/"
-cp -r "$DOTFILES_DIR/.config/fontconfig" "$HOME/.config/"
+cp "$DOTFILES_DIR/.dots/.fonts.conf" "$HOME/"
+cp -r "$DOTFILES_DIR/.dots/.fonts" "$HOME/"
+cp -r "$DOTFILES_DIR/.dots/.config/fontconfig" "$HOME/.config/"
 
 # Zsh and Oh-My-Zsh installation
 if ! command -v zsh &> /dev/null; then
