@@ -70,8 +70,8 @@ sudo wget -P /usr/share/sddm/themes/ $THEME_URL &&
 sudo unzip /usr/share/sddm/themes/catppuccin-mocha.zip -d /usr/share/sddm/themes/ && 
 sudo rm /usr/share/sddm/themes/catppuccin-mocha.zip
 
-sudo sed -i '/[Theme]/,+1 s/Current=.*/Current=catppuccin-mocha/' /etc/sddm.conf || \
-sudo sh -c 'echo "[Theme]\nCurrent=catppuccin-mocha" >> /etc/sddm.conf'
+sudo sed -i '/\[Theme\]/,+1 s/Current=.*/Current=catppuccin-mocha/' /etc/sddm.conf || \
+sudo bash -c 'echo -e "[Theme]\nCurrent=catppuccin-mocha" >> /etc/sddm.conf'
 
 sudo systemctl restart sddm
 
