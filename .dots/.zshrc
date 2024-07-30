@@ -1,8 +1,6 @@
 export ZSH="$HOME/.oh-my-zsh"
 
-#ZSH_THEME="agnoster"
-
-eval "$(starship init zsh)"
+ZSH_THEME="xiong-chiamiov-plus"
 
 plugins=(
 	git
@@ -14,9 +12,17 @@ plugins=(
 	colored-man-pages
 	zsh-autosuggestions
 	zsh-syntax-highlighting
+    archlinux
 )
 
 source $ZSH/oh-my-zsh.sh
+
+pokemon-colorscripts --no-title -s -r
+source <(fzf --zsh)
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory
 
 alias p="python3"
 alias j='jsonVer(){ cat "$@" | jq; unset -f jsonVer; }; jsonVer'
