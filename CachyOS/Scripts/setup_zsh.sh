@@ -1,5 +1,4 @@
-setup_zsh() {
-  echo "ZSH kuruluyor..."
+echo "ZSH kuruluyor..."
   sudo pacman -Sy --noconfirm --needed zsh
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
@@ -21,4 +20,3 @@ setup_zsh() {
 
   # ZSH kabuğunu varsayılan kabuk olarak ayarlayın
   chsh -s /bin/zsh
-}
