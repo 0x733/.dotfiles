@@ -1,163 +1,150 @@
-import m3u8
+import yt_dlp
 import requests
-from bs4 import BeautifulSoup
+from requests_html import HTMLSession
 import logging
 import os
 import subprocess
-from tqdm import tqdm
-import time
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 # Loglama ayarları
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
-class AdvancedHLSParser:
+class AdvancedLinkFinder:
     def __init__(self, url):
         self.url = url
-        self.playlist_url = None
-        self.playlist = None
-        self.live = False
+        self.media_url = None
 
-    def find_hls_url(self):
+    def find_with_yt_dlp(self):
         """
-        Web sayfasında HLS URL'sini bulur.
+        yt-dlp kullanarak web sayfasından medya linklerini bulur.
         """
-        logging.info(f"Searching for HLS URL in webpage: {self.url}")
+        logging.info(f"Using yt-dlp to extract media links from: {self.url}")
         try:
-            response = requests.get(self.url)
-            response.raise_for_status()
+            ydl_opts = {
+                'quiet': True,
+                'skip_download': True,  # Yalnızca URL'yi çıkarmak istiyoruz, indirmeyeceğiz
+                'force_generic_extractor': True,  # Bazı siteler için generic extractor'ı zorla
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(self.url, download=False)
+                if 'url' in info:
+                    self.media_url = info['url']
+                    logging.info(f"Media URL found: {self.media_url}")
+                else:
+                    logging.warning("No media URL found with yt-dlp.")
+        except Exception as e:
+            logging.error(f"Error using yt-dlp: {e}")
+            return False
+        return True
 
-            # Sayfa içeriğini analiz ediyoruz
-            soup = BeautifulSoup(response.text, 'html.parser')
-
-            # .m3u8 uzantılı linkleri buluyoruz
-            hls_links = [link.get('src') for link in soup.find_all('source') if link.get('src') and '.m3u8' in link.get('src')]
-            if not hls_links:
-                hls_links = [link.get('href') for link in soup.find_all('a') if link.get('href') and '.m3u8' in link.get('href')]
-
-            if hls_links:
-                self.playlist_url = hls_links[0]
-                logging.info(f"Found HLS URL: {self.playlist_url}")
+    def find_with_requests_html(self):
+        """
+        requests-html kullanarak dinamik içeriklerle medya linklerini bulur.
+        """
+        logging.info(f"Using requests_html to extract media links from: {self.url}")
+        try:
+            session = HTMLSession()
+            response = session.get(self.url)
+            response.html.render(timeout=20)  # JavaScript ile dinamik içeriği beklemek
+            media_links = [link for link in response.html.absolute_links if '.m3u8' in link]
+            
+            if media_links:
+                self.media_url = media_links[0]  # İlk bulduğu linki kullanıyoruz
+                logging.info(f"Media URL found with requests_html: {self.media_url}")
             else:
-                logging.warning("No HLS playlist URL found in the webpage.")
-        except requests.RequestException as e:
-            logging.error(f"Error fetching webpage: {e}")
+                logging.warning("No media URL found with requests_html.")
+        except Exception as e:
+            logging.error(f"Error using requests_html: {e}")
             return False
         return True
 
-    def download_playlist(self):
+    def find_with_selenium(self):
         """
-        Playlist'i indirir ve m3u8 formatında işler.
+        Selenium kullanarak tarayıcı üzerinden HLS linklerini bulur.
         """
-        if not self.playlist_url:
-            logging.error("HLS playlist URL is not available. Please find the HLS URL first.")
-            return False
-
-        logging.info(f"Downloading HLS playlist from: {self.playlist_url}")
+        logging.info(f"Using Selenium to extract media links from: {self.url}")
         try:
-            response = requests.get(self.playlist_url)
-            response.raise_for_status()
-            self.playlist = m3u8.loads(response.text)
-        except requests.RequestException as e:
-            logging.error(f"Error downloading playlist: {e}")
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")  # Tarayıcıyı arka planda çalıştır
+            service = Service(executable_path='/usr/bin/chromedriver')  # ChromeDriver yolu
+
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+            driver.get(self.url)
+
+            # Sayfadaki .m3u8 linklerini buluyoruz
+            media_elements = driver.find_elements(By.XPATH, "//a[contains(@href, '.m3u8')]")
+            if media_elements:
+                self.media_url = media_elements[0].get_attribute('href')
+                logging.info(f"Media URL found with Selenium: {self.media_url}")
+            else:
+                logging.warning("No media URL found with Selenium.")
+            driver.quit()
+        except Exception as e:
+            logging.error(f"Error using Selenium: {e}")
             return False
         return True
 
-    def parse_media_playlist(self):
+    def download_with_mpv(self):
         """
-        HLS playlist'indeki segmentleri analiz eder.
+        Bulunan HLS linkini MPV kullanarak indirir veya oynatır.
         """
-        if not self.playlist.is_variant:
-            logging.info(f"Found {len(self.playlist.segments)} media segments.")
-            for i, segment in enumerate(self.playlist.segments):
-                logging.info(f"Segment {i+1}:")
-                logging.info(f"  - URI: {segment.uri}")
-                logging.info(f"  - Duration: {segment.duration} seconds")
-                if segment.key:
-                    logging.info(f"  - Encrypted with: {segment.key.method}")
-                    logging.info(f"  - Key URI: {segment.key.uri}")
+        if not self.media_url:
+            logging.error("No media URL available to play or download.")
+            return False
+
+        play = input(f"Do you want to play or download the media? (play/download): ").strip().lower()
+        if play == "play":
+            self.play_with_mpv(self.media_url)
+        elif play == "download":
+            self.download_with_yt_dlp(self.media_url)
         else:
-            logging.warning("This is a master playlist. To parse media segments, choose a variant playlist.")
+            logging.warning("Invalid option selected.")
+        return True
 
-    def download_segments(self, download_folder="segments"):
+    def play_with_mpv(self, media_url):
         """
-        Medya segmentlerini indirir ve dosya olarak kaydeder.
-        """
-        if not self.playlist.is_variant:
-            if not os.path.exists(download_folder):
-                os.makedirs(download_folder)
-
-            logging.info(f"Downloading {len(self.playlist.segments)} segments to {download_folder}.")
-            for i, segment in tqdm(enumerate(self.playlist.segments), total=len(self.playlist.segments)):
-                segment_url = segment.uri
-                segment_filename = os.path.join(download_folder, f"segment_{i+1}.ts")
-                try:
-                    with requests.get(segment_url, stream=True) as r:
-                        r.raise_for_status()
-                        with open(segment_filename, 'wb') as f:
-                            for chunk in r.iter_content(chunk_size=8192):
-                                f.write(chunk)
-                    logging.info(f"Downloaded: {segment_filename}")
-                    
-                    self.ask_to_play_segment(segment_filename)
-
-                except requests.RequestException as e:
-                    logging.error(f"Error downloading segment {segment_url}: {e}")
-        else:
-            logging.warning("Cannot download segments from a master playlist.")
-
-    def ask_to_play_segment(self, segment_filename):
-        """
-        Kullanıcıya segmenti MPV ile oynatmak isteyip istemediğini sorar.
-        """
-        play = input(f"Do you want to play the segment {segment_filename} with MPV? (y/n): ").strip().lower()
-        if play == 'y':
-            self.play_with_mpv(segment_filename)
-        else:
-            logging.info(f"Skipping playback of {segment_filename}.")
-
-    def play_with_mpv(self, segment_filename):
-        """
-        MPV ile segmenti oynatır.
+        MPV kullanarak bulunan medya linkini oynatır.
         """
         try:
-            logging.info(f"Playing segment {segment_filename} with MPV.")
-            subprocess.run(['mpv', segment_filename], check=True)
+            logging.info(f"Playing media with MPV: {media_url}")
+            subprocess.run(['mpv', media_url], check=True)
         except subprocess.CalledProcessError as e:
-            logging.error(f"Error occurred while playing the segment with MPV: {e}")
+            logging.error(f"Error occurred while playing the media with MPV: {e}")
 
-    def parse_keys(self):
+    def download_with_yt_dlp(self, media_url):
         """
-        Playlist içindeki şifreleme anahtarlarını analiz eder.
+        yt-dlp kullanarak medya linkini indirir.
         """
-        if not self.playlist.is_variant and self.playlist.keys:
-            logging.info("Found encryption keys:")
-            for key in self.playlist.keys:
-                logging.info(f"  - Method: {key.method}")
-                logging.info(f"  - Key URI: {key.uri}")
-                logging.info(f"  - IV: {key.iv}")
-        else:
-            logging.info("No encryption keys found or this is a master playlist.")
-
-    def report_playlist(self):
-        """
-        Playlist'in toplam süresi, segment sayısı gibi bilgileri raporlar.
-        """
-        total_duration = sum(segment.duration for segment in self.playlist.segments)
-        logging.info(f"Total Playlist Duration: {total_duration:.2f} seconds")
-        logging.info(f"Number of Segments: {len(self.playlist.segments)}")
+        logging.info(f"Using yt-dlp to download media from: {media_url}")
+        try:
+            ydl_opts = {
+                'outtmpl': '%(title)s.%(ext)s',
+                'quiet': False,
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([media_url])
+        except Exception as e:
+            logging.error(f"Error using yt-dlp to download media: {e}")
+            return False
+        return True
 
 
-# Main fonksiyonu ile script'in çalışmasını başlatıyoruz
+# Main script
 if __name__ == "__main__":
-    webpage_url = input("Enter webpage URL to search for HLS stream: ")
-    parser = AdvancedHLSParser(webpage_url)
+    webpage_url = input("Enter webpage URL to search for media stream: ")
+    parser = AdvancedLinkFinder(webpage_url)
 
-    if parser.find_hls_url():
-        if parser.download_playlist():
-            parser.report_playlist()
-            parser.parse_media_playlist()
-            parser.parse_keys()
+    # Öncelikle yt-dlp ile deniyoruz
+    if not parser.find_with_yt_dlp():
+        # requests_html ile deniyoruz
+        if not parser.find_with_requests_html():
+            # Son çare Selenium ile deniyoruz
+            parser.find_with_selenium()
 
-            # Segmentleri indir ve analiz et
-            parser.download_segments()
+    if parser.media_url:
+        parser.download_with_mpv()
+    else:
+        logging.error("No media URL found with any method.")
