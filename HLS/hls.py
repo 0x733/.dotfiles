@@ -1,6 +1,5 @@
 import yt_dlp
 import requests
-from requests_html import HTMLSession
 import logging
 import os
 import subprocess
@@ -37,27 +36,6 @@ class AdvancedLinkFinder:
                     logging.warning("No media URL found with yt-dlp.")
         except Exception as e:
             logging.error(f"Error using yt-dlp: {e}")
-            return False
-        return True
-
-    def find_with_requests_html(self):
-        """
-        requests-html kullanarak dinamik içeriklerle medya linklerini bulur.
-        """
-        logging.info(f"Using requests_html to extract media links from: {self.url}")
-        try:
-            session = HTMLSession()
-            response = session.get(self.url)
-            response.html.render(timeout=20)  # JavaScript ile dinamik içeriği beklemek
-            media_links = [link for link in response.html.absolute_links if '.m3u8' in link]
-            
-            if media_links:
-                self.media_url = media_links[0]  # İlk bulduğu linki kullanıyoruz
-                logging.info(f"Media URL found with requests_html: {self.media_url}")
-            else:
-                logging.warning("No media URL found with requests_html.")
-        except Exception as e:
-            logging.error(f"Error using requests_html: {e}")
             return False
         return True
 
@@ -139,10 +117,8 @@ if __name__ == "__main__":
 
     # Öncelikle yt-dlp ile deniyoruz
     if not parser.find_with_yt_dlp():
-        # requests_html ile deniyoruz
-        if not parser.find_with_requests_html():
-            # Son çare Selenium ile deniyoruz
-            parser.find_with_selenium()
+        # Son çare Selenium ile deniyoruz
+        parser.find_with_selenium()
 
     if parser.media_url:
         parser.download_with_mpv()
