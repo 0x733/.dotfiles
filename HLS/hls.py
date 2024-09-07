@@ -13,11 +13,20 @@ class AdvancedLinkFinder:
         self.url = url
         self.media_url = None
 
-    def find_with_selenium_and_regex(self):
+    def find_with_selenium_and_regex(self, url=None, depth=3):
         """
         Selenium kullanarak sayfanın HTML kaynağını alır ve regex ile medya linklerini arar.
+        Recursive olarak daha derin sayfalarda da aynı işlemi yapar.
+        'depth' parametresi, recursive işlemin kaç derinliğe kadar devam edeceğini belirler.
         """
-        logging.info(f"Using Selenium to extract media links from: {self.url}")
+        if depth == 0:
+            logging.warning(f"Maximum recursion depth reached for {url}. No media found.")
+            return None
+
+        if url is None:
+            url = self.url
+
+        logging.info(f"Using Selenium to extract media links from: {url}")
         try:
             chrome_options = Options()
             chrome_options.add_argument("--headless")  # Tarayıcıyı arka planda çalıştır
@@ -27,7 +36,7 @@ class AdvancedLinkFinder:
             service = Service(executable_path='/usr/bin/chromedriver')  # ChromeDriver yolu
 
             driver = webdriver.Chrome(service=service, options=chrome_options)
-            driver.get(self.url)
+            driver.get(url)
             
             # Sayfanın tam olarak yüklenmesini bekliyoruz
             driver.implicitly_wait(10)
@@ -39,13 +48,20 @@ class AdvancedLinkFinder:
             # Regex kullanarak medya dosyalarını buluyoruz
             media_links = self.extract_media_links_with_regex(page_source)
 
+            # Eğer medya linki bulunursa döndür
             if media_links:
-                self.media_url = media_links[0]  # İlk medya linkini kullanıyoruz
-                logging.info(f"Media URL found with Selenium and Regex: {self.media_url}")
-                return self.media_url
-            else:
-                logging.warning("No media URL found with Selenium and Regex.")
-                return None
+                for link in media_links:
+                    if self.is_media_file(link):
+                        self.media_url = link
+                        logging.info(f"Media URL found: {self.media_url}")
+                        return self.media_url
+                    else:
+                        # Bulunan bağlantı bir sayfa olabilir, o zaman recursive olarak içeri gireriz
+                        logging.info(f"Found a non-media link, recursing into: {link}")
+                        return self.find_with_selenium_and_regex(link, depth - 1)
+
+            logging.warning(f"No media URL found at {url}.")
+            return None
         except Exception as e:
             logging.error(f"Error using Selenium: {e}")
             return None
@@ -72,6 +88,13 @@ class AdvancedLinkFinder:
             media_links.extend(matches)
 
         return media_links
+
+    def is_media_file(self, url):
+        """
+        Bir URL'nin doğrudan bir medya dosyası olup olmadığını kontrol eder.
+        """
+        media_file_extensions = ['.m3u8', '.mpd', '.mp4', '.mkv']
+        return any(url.endswith(ext) for ext in media_file_extensions)
 
     def play_with_yt_dlp(self, media_url):
         """
