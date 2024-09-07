@@ -1,7 +1,6 @@
 import yt_dlp
 import requests
 import logging
-import os
 import subprocess
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -16,11 +15,15 @@ class AdvancedLinkFinder:
         self.url = url
         self.media_url = None
 
-    def find_with_yt_dlp(self):
+    def find_with_yt_dlp(self, url=None):
         """
         yt-dlp kullanarak web sayfasından medya linklerini bulur.
+        Eğer 'url' parametresi verilmezse, sınıfa atanmış olan URL kullanılır.
         """
-        logging.info(f"Using yt-dlp to extract media links from: {self.url}")
+        if url is None:
+            url = self.url
+
+        logging.info(f"Using yt-dlp to extract media links from: {url}")
         try:
             ydl_opts = {
                 'quiet': True,
@@ -28,42 +31,55 @@ class AdvancedLinkFinder:
                 'force_generic_extractor': True,  # Bazı siteler için generic extractor'ı zorla
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(self.url, download=False)
+                info = ydl.extract_info(url, download=False)
                 if 'url' in info:
-                    self.media_url = info['url']
-                    logging.info(f"Media URL found: {self.media_url}")
+                    media_url = info['url']
+                    logging.info(f"Media URL found: {media_url}")
+                    return media_url
                 else:
-                    logging.warning("No media URL found with yt-dlp.")
+                    logging.warning(f"No media URL found with yt-dlp for {url}.")
+                    return None
         except Exception as e:
             logging.error(f"Error using yt-dlp: {e}")
-            return False
-        return True
+            return None
 
-    def find_with_selenium(self):
+    def recursive_media_finder(self, url=None, depth=2):
         """
-        Selenium kullanarak tarayıcı üzerinden HLS linklerini bulur.
+        Medya linkini tekrar tekrar yakalamak için recursive yakalama yapar.
+        'depth' parametresi, kaç defa tekrar yakalamaya çalışacağını belirtir.
         """
-        logging.info(f"Using Selenium to extract media links from: {self.url}")
-        try:
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")  # Tarayıcıyı arka planda çalıştır
-            service = Service(executable_path='/usr/bin/chromedriver')  # ChromeDriver yolu
+        if depth == 0:
+            logging.warning("Maximum recursion depth reached. No media link found.")
+            return None
 
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-            driver.get(self.url)
-
-            # Sayfadaki .m3u8 linklerini buluyoruz
-            media_elements = driver.find_elements(By.XPATH, "//a[contains(@href, '.m3u8')]")
-            if media_elements:
-                self.media_url = media_elements[0].get_attribute('href')
-                logging.info(f"Media URL found with Selenium: {self.media_url}")
+        media_url = self.find_with_yt_dlp(url)
+        if media_url:
+            if ".m3u8" in media_url or ".mpd" in media_url or media_url.endswith(('.mp4', '.mkv')):
+                # Eğer medya formatı yakalanmışsa, işlemi durdur ve sonucu geri dön.
+                return media_url
             else:
-                logging.warning("No media URL found with Selenium.")
-            driver.quit()
-        except Exception as e:
-            logging.error(f"Error using Selenium: {e}")
-            return False
-        return True
+                logging.info(f"Recursing into: {media_url}")
+                # Eğer hala medya formatı değilse, bu URL'yi de işleyerek tekrar medya araması yap.
+                return self.recursive_media_finder(media_url, depth - 1)
+        else:
+            logging.warning(f"Could not find media link at {url}")
+            return None
+
+    def download_or_play_media(self):
+        """
+        Bulunan medya URL'sini ya oynatır ya da indirir.
+        """
+        final_media_url = self.recursive_media_finder(self.url)
+        if final_media_url:
+            play = input(f"Do you want to play or download the media? (play/download): ").strip().lower()
+            if play == "play":
+                self.play_with_yt_dlp(final_media_url)
+            elif play == "download":
+                self.download_with_yt_dlp(final_media_url)
+            else:
+                logging.warning("Invalid option selected.")
+        else:
+            logging.error("No media URL found after recursive search.")
 
     def play_with_yt_dlp(self, media_url):
         """
@@ -98,35 +114,11 @@ class AdvancedLinkFinder:
             return False
         return True
 
-    def download_or_play_media(self):
-        """
-        Bulunan medya URL'sini ya oynatır ya da indirir.
-        """
-        if not self.media_url:
-            logging.error("No media URL available to play or download.")
-            return False
-
-        play = input(f"Do you want to play or download the media? (play/download): ").strip().lower()
-        if play == "play":
-            self.play_with_yt_dlp(self.media_url)
-        elif play == "download":
-            self.download_with_yt_dlp(self.media_url)
-        else:
-            logging.warning("Invalid option selected.")
-        return True
-
 
 # Main script
 if __name__ == "__main__":
     webpage_url = input("Enter webpage URL to search for media stream: ")
     parser = AdvancedLinkFinder(webpage_url)
 
-    # Öncelikle yt-dlp ile deniyoruz
-    if not parser.find_with_yt_dlp():
-        # Son çare Selenium ile deniyoruz
-        parser.find_with_selenium()
-
-    if parser.media_url:
-        parser.download_or_play_media()
-    else:
-        logging.error("No media URL found with any method.")
+    # Recursive medya araması
+    parser.download_or_play_media()
