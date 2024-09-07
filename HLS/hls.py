@@ -65,32 +65,21 @@ class AdvancedLinkFinder:
             return False
         return True
 
-    def download_with_mpv(self):
+    def play_with_yt_dlp(self, media_url):
         """
-        Bulunan HLS linkini MPV kullanarak indirir veya oynatır.
-        """
-        if not self.media_url:
-            logging.error("No media URL available to play or download.")
-            return False
-
-        play = input(f"Do you want to play or download the media? (play/download): ").strip().lower()
-        if play == "play":
-            self.play_with_mpv(self.media_url)
-        elif play == "download":
-            self.download_with_yt_dlp(self.media_url)
-        else:
-            logging.warning("Invalid option selected.")
-        return True
-
-    def play_with_mpv(self, media_url):
-        """
-        MPV kullanarak bulunan medya linkini oynatır.
+        yt-dlp ile videoyu oynatır.
         """
         try:
-            logging.info(f"Playing media with MPV: {media_url}")
-            subprocess.run(['mpv', media_url], check=True)
-        except subprocess.CalledProcessError as e:
-            logging.error(f"Error occurred while playing the media with MPV: {e}")
+            logging.info(f"Playing media with yt-dlp: {media_url}")
+            ydl_opts = {
+                'quiet': False,
+                'noplaylist': True,  # Sadece bir dosya indir
+                'format': 'best',    # En iyi kaliteyi seç
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([media_url])
+        except Exception as e:
+            logging.error(f"Error occurred while playing the media with yt-dlp: {e}")
 
     def download_with_yt_dlp(self, media_url):
         """
@@ -109,6 +98,23 @@ class AdvancedLinkFinder:
             return False
         return True
 
+    def download_or_play_media(self):
+        """
+        Bulunan medya URL'sini ya oynatır ya da indirir.
+        """
+        if not self.media_url:
+            logging.error("No media URL available to play or download.")
+            return False
+
+        play = input(f"Do you want to play or download the media? (play/download): ").strip().lower()
+        if play == "play":
+            self.play_with_yt_dlp(self.media_url)
+        elif play == "download":
+            self.download_with_yt_dlp(self.media_url)
+        else:
+            logging.warning("Invalid option selected.")
+        return True
+
 
 # Main script
 if __name__ == "__main__":
@@ -121,6 +127,6 @@ if __name__ == "__main__":
         parser.find_with_selenium()
 
     if parser.media_url:
-        parser.download_with_mpv()
+        parser.download_or_play_media()
     else:
         logging.error("No media URL found with any method.")
