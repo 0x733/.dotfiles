@@ -199,6 +199,6 @@ class VideoScraper:
 
 # Example usage
 if __name__ == "__main__":
-    url = "https://www.example.com"
+    url = input("Please enter the URL to scrape: ")  # Taking URL input from the user
     scraper = VideoScraper(url)
     scraper.scrape()
