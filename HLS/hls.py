@@ -1,16 +1,14 @@
 import time
 import random
 import logging
-from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import undetected_chromedriver as uc
-import concurrent.futures
 
-# Logger configuration with asynchronous logging
+# Logger configuration
 logging.basicConfig(
     format='%(asctime)s - %(message)s',
     level=logging.INFO
@@ -52,9 +50,7 @@ class VideoScraper:
         try:
             # Launch browser
             driver = uc.Chrome(options=options)
-            # Enable performance logs to capture XHR requests
-            driver.command_executor._commands['getLog'] = ('POST', '/session/$sessionId/log')
-            logging.info("Browser launched and performance logs enabled.")
+            logging.info("Browser launched.")
             return driver
         except WebDriverException as e:
             logging.error(f"Error launching browser: {e}")
@@ -134,24 +130,6 @@ class VideoScraper:
         except WebDriverException as e:
             logging.error(f"Error during mouse movement simulation: {e}")
 
-    def get_xhr_requests(self):
-        try:
-            logs = self.driver.get_log('performance')
-            video_links = []
-            for log in logs:
-                log_message = log["message"]
-                if "m3u8" in log_message or "mp4" in log_message or "mpd" in log_message:
-                    start = log_message.find("url") + 6
-                    end = log_message.find("\"", start)
-                    video_url = log_message[start:end]
-                    video_links.append(video_url)
-
-            logging.info(f"{len(video_links)} video links found.")
-            return video_links
-        except WebDriverException as e:
-            logging.error(f"Error fetching XHR requests: {e}")
-            return []
-
     def scrape(self):
         retries = 0
         while retries < self.max_retries:
@@ -178,18 +156,9 @@ class VideoScraper:
                 element = self.driver.find_element(By.TAG_NAME, 'body')
                 self.human_like_mouse_movements(element)
 
-                # Capture video links via XHR requests
-                video_links = self.get_xhr_requests()
-
-                # Log video links found
-                if video_links:
-                    logging.info("Video URLs found:")
-                    for link in video_links:
-                        logging.info(link)
-                    break  # Exit loop on success
-                else:
-                    logging.warning("No video links found. Retrying...")
-                    retries += 1
+                # Log success and break
+                logging.info("Scraping completed successfully.")
+                break
 
             except (TimeoutException, WebDriverException) as e:
                 logging.error(f"Error during scraping: {e}. Retrying...")
