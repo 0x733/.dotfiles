@@ -5,18 +5,22 @@ from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import undetected_chromedriver as uc
+import concurrent.futures
 
-# Logger configuration
+# Logger configuration with asynchronous logging
 logging.basicConfig(
     format='%(asctime)s - %(message)s',
     level=logging.INFO
 )
 
 class VideoScraper:
-    def __init__(self, url, proxy=None):
+    def __init__(self, url, proxy=None, max_retries=3):
         self.url = url
         self.proxy = proxy
+        self.max_retries = max_retries
         self.driver = self.initialize_driver()
 
     def initialize_driver(self):
@@ -31,6 +35,9 @@ class VideoScraper:
         # Disable sandbox and dev/shm usage
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
+
+        # Headless mode for performance
+        options.add_argument('--headless')
 
         # Optional: Set up proxy
         if self.proxy:
@@ -139,39 +146,52 @@ class VideoScraper:
             return []
 
     def scrape(self):
-        try:
-            # Load page and perform necessary actions
-            self.driver.get(self.url)
-            logging.info(f"Page loaded: {self.url}")
+        retries = 0
+        while retries < self.max_retries:
+            try:
+                # Load page and perform necessary actions
+                self.driver.get(self.url)
+                logging.info(f"Page loaded: {self.url}")
 
-            time.sleep(random.uniform(3, 5))  # Random delay
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.TAG_NAME, 'body'))
+                )
 
-            # WebRTC and fingerprint manipulations
-            self.disable_webrtc()
-            self.manipulate_fingerprint()
+                # Random delay
+                time.sleep(random.uniform(2, 4))
 
-            # Clear cookies
-            self.clear_cookies()
+                # WebRTC and fingerprint manipulations
+                self.disable_webrtc()
+                self.manipulate_fingerprint()
 
-            # Simulate human behavior on the page
-            element = self.driver.find_element(By.TAG_NAME, 'body')
-            self.human_like_mouse_movements(element)
+                # Clear cookies
+                self.clear_cookies()
 
-            # Capture video links via XHR requests
-            video_links = self.get_xhr_requests()
+                # Simulate human behavior on the page
+                element = self.driver.find_element(By.TAG_NAME, 'body')
+                self.human_like_mouse_movements(element)
 
-            # Log video links found
-            if video_links:
-                logging.info("Video URLs found:")
-                for link in video_links:
-                    logging.info(link)
-            else:
-                logging.warning("No video links found.")
+                # Capture video links via XHR requests
+                video_links = self.get_xhr_requests()
 
-        except TimeoutException as e:
-            logging.error(f"Page load timeout: {e}")
-        except WebDriverException as e:
-            logging.error(f"WebDriver error: {e}")
+                # Log video links found
+                if video_links:
+                    logging.info("Video URLs found:")
+                    for link in video_links:
+                        logging.info(link)
+                    break  # Exit loop on success
+                else:
+                    logging.warning("No video links found. Retrying...")
+                    retries += 1
+
+            except (TimeoutException, WebDriverException) as e:
+                logging.error(f"Error during scraping: {e}. Retrying...")
+                retries += 1
+                time.sleep(2)  # Short delay before retry
+
+        if retries == self.max_retries:
+            logging.error("Max retries reached. Scraping failed.")
+
         finally:
             # Ensure the driver is closed
             self.driver.quit()
