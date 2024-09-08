@@ -1,89 +1,159 @@
-import scrapy
-import re
-import subprocess
+import time
+import random
+import logging
+from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+import undetected_chromedriver as uc
 
-class XHRVideoSpider(scrapy.Spider):
-    name = "xhr_video_ffmpeg"
+# Logger yapılandırması
+logging.basicConfig(
+    format='%(asctime)s - %(message)s',
+    level=logging.INFO
+)
 
-    def __init__(self, user_url=None, *args, **kwargs):
-        super(XHRVideoSpider, self).__init__(*args, **kwargs)
-        self.start_urls = [user_url]  # Kullanıcıdan gelen URL'yi başlangıç URL'si yapıyoruz
+class VideoScraper:
+    def __init__(self, url, proxy=None):
+        self.url = url
+        self.proxy = proxy
+        self.driver = self.initialize_driver()
 
-    # Playwright middleware'i kullanarak istek gönder
-    custom_settings = {
-        "PLAYWRIGHT_BROWSER_TYPE": "chromium",  # chromium, firefox veya webkit seçilebilir
-        "DOWNLOAD_HANDLERS": {
-            "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-            "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-        },
-        "TWISTED_REACTOR": "twisted.internet.asyncioreactor.AsyncioSelectorReactor",
-        "PLAYWRIGHT_LAUNCH_OPTIONS": {"headless": True},
-        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.110 Safari/537.36"
-    }
+    def initialize_driver(self):
+        options = uc.ChromeOptions()
+        
+        # Rastgele bir tarayıcı başlığı ekleyin
+        options.add_argument(f'user-agent={self.get_random_user_agent()}')
+        
+        # Tarayıcı pencere boyutu ayarlayın
+        options.add_argument('--window-size=1920,1080')
+        
+        # Sandbox ve Dev/SHM kullanımlarını devre dışı bırakın
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        
+        # Proxy ayarlamak isteğe bağlıdır
+        if self.proxy:
+            options.add_argument(f'--proxy-server={self.proxy}')
+            logging.info(f'Proxy kullanılıyor: {self.proxy}')
 
-    async def parse(self, response):
-        """
-        Sayfadaki tüm XHR isteklerini kontrol eder ve video bağlantılarını yakalar.
-        """
-        page = response.meta["playwright_page"]
+        # Tarayıcıyı başlatın
+        driver = uc.Chrome(options=options)
+        
+        # Performans logları açın (XHR isteklerini yakalamak için)
+        driver.command_executor._commands['getLog'] = ('POST', '/session/$sessionId/log')
+        logging.info("Tarayıcı başlatıldı ve performans logları etkinleştirildi.")
+        
+        return driver
 
-        # Sayfadaki ağ (network) isteklerini dinlemek için bir işlev ekliyoruz
-        video_urls = []
+    def get_random_user_agent(self):
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.1 Safari/605.1.15",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36"
+        ]
+        user_agent = random.choice(user_agents)
+        logging.info(f'Kullanılan User-Agent: {user_agent}')
+        return user_agent
 
-        async def intercept_request(route, request):
-            """XHR veya diğer ağ isteklerini kontrol et"""
-            video_live_regex = re.compile(r"(https?://[^\s]+(?:\.mp4|\.m3u8|\.mpd)|https?://[^\s]+(?:hls|live|video)[^\s]*)")
-
-            if request.resource_type == "xhr":
-                # Yalnızca XHR (AJAX) isteklerini kontrol et
-                if video_live_regex.match(request.url):
-                    print(f"Found media URL: {request.url}")
-                    video_urls.append(request.url)
-
-            await route.continue_()
-
-        # Ağ trafiğini dinle
-        await page.route("**/*", intercept_request)
-
-        # Sayfayı yükle
-        await page.goto(response.url)
-
-        # Dinamik olarak yüklenen XHR isteklerini bekleyin
-        await page.wait_for_timeout(10000)  # 10 saniye beklemek isteklere göre artırılabilir
-
-        # Bulunan video URL'lerini ve codec bilgilerini yield ile dışarı çıkar ve bitrate analizi yap
-        for video_url in video_urls:
-            print(f"URL Bulundu: {video_url}")
-            yield {
-                "video_url": video_url,
-                "bitrate_analysis": self.analyze_bitrate(video_url)
+    def disable_webrtc(self):
+        self.driver.execute_script("""
+            var getUserMedia = navigator.mediaDevices.getUserMedia;
+            navigator.mediaDevices.getUserMedia = function() {
+                return new Promise(function(resolve, reject) {
+                    reject(new Error("WebRTC is disabled"));
+                });
             }
+        """)
+        logging.info("WebRTC devre dışı bırakıldı.")
 
-        await page.close()
+    def manipulate_fingerprint(self):
+        self.driver.execute_script("""
+            const getContext = HTMLCanvasElement.prototype.getContext;
+            HTMLCanvasElement.prototype.getContext = function() {
+                return null;
+            };
 
-    def analyze_bitrate(self, video_url):
-        # FFmpeg kullanarak bitrate analizi
-        try:
-            # FFmpeg komutu: video URL'sini alır ve bitrate bilgisini gösterir
-            command = ["ffmpeg", "-i", video_url, "-f", "null", "-"]
-            result = subprocess.run(command, stderr=subprocess.PIPE, text=True)
-            # FFmpeg'in çıktısındaki bitrate bilgisini ayıkla
-            bitrate_info = re.findall(r'bitrate:\s*(\d+\s*kb/s)', result.stderr)
-            if bitrate_info:
-                return f"Bitrate bilgisi: {bitrate_info[0]}"
-            else:
-                return "Bitrate bilgisi bulunamadı."
-        except Exception as e:
-            return f"Bitrate analizinde hata oluştu: {str(e)}"
+            const getChannelData = AudioBuffer.prototype.getChannelData;
+            AudioBuffer.prototype.getChannelData = function() {
+                return new Float32Array(44100);
+            };
 
-# Scrapy projesini çalıştırmak için aşağıdaki kodu kullanın
-from scrapy.crawler import CrawlerProcess
+            Object.defineProperty(screen, 'width', {
+                get: function() { return 1920; }
+            });
+            Object.defineProperty(screen, 'height', {
+                get: function() { return 1080; }
+            });
+        """)
+        logging.info("Tarayıcı parmak izi manipüle edildi.")
 
+    def clear_cookies(self):
+        self.driver.delete_all_cookies()
+        logging.info("Çerezler temizlendi.")
+
+    def human_like_mouse_movements(self, element):
+        actions = ActionChains(self.driver)
+        actions.move_to_element_with_offset(element, random.randint(-50, 50), random.randint(-50, 50))
+
+        for _ in range(random.randint(3, 7)):
+            x_offset = random.randint(-100, 100)
+            y_offset = random.randint(-100, 100)
+            actions.move_by_offset(x_offset, y_offset)
+            actions.pause(random.uniform(0.1, 0.5))
+
+        actions.move_to_element(element).click().perform()
+        logging.info("Fare hareketleri ve tıklamalar simüle edildi.")
+
+    def get_xhr_requests(self):
+        logs = self.driver.get_log('performance')
+        video_links = []
+        for log in logs:
+            log_message = log["message"]
+            if "m3u8" in log_message or "mp4" in log_message or "mpd" in log_message:
+                start = log_message.find("url") + 6
+                end = log_message.find("\"", start)
+                video_url = log_message[start:end]
+                video_links.append(video_url)
+
+        logging.info(f"{len(video_links)} video bağlantısı bulundu.")
+        return video_links
+
+    def scrape(self):
+        # Sayfayı başlatın ve gerekli adımları gerçekleştirin
+        self.driver.get(self.url)
+        logging.info(f"Sayfa yüklendi: {self.url}")
+        
+        time.sleep(random.uniform(3, 5))  # Rastgele gecikme
+
+        # WebRTC ve parmak izi manipülasyonları
+        self.disable_webrtc()
+        self.manipulate_fingerprint()
+
+        # Çerezleri temizleyin
+        self.clear_cookies()
+
+        # Sayfada insan davranışıyla gezinme
+        element = self.driver.find_element(By.TAG_NAME, 'body')
+        self.human_like_mouse_movements(element)
+
+        # XHR üzerinden video linklerini yakalayın
+        video_links = self.get_xhr_requests()
+
+        # Video bağlantılarını döndürün
+        if video_links:
+            logging.info("Bulunan video URL'leri:")
+            for link in video_links:
+                logging.info(link)
+        else:
+            logging.warning("Video bağlantısı bulunamadı.")
+        
+        # Tarayıcıyı kapatın
+        self.driver.quit()
+        logging.info("Tarayıcı kapatıldı.")
+
+# Örnek kullanım
 if __name__ == "__main__":
-    # Kullanıcıdan URL al
-    user_url = input("Lütfen bir URL girin: ")
-
-    # Scrapy örneğini başlat
-    process = CrawlerProcess()
-    process.crawl(XHRVideoSpider, user_url=user_url)
-    process.start()
+    url = "https://www.example.com"
+    scraper = VideoScraper(url)
+    scraper.scrape()
