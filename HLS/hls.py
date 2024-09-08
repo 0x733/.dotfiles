@@ -4,9 +4,10 @@ import logging
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 import undetected_chromedriver as uc
 
-# Logger yapılandırması
+# Logger configuration
 logging.basicConfig(
     format='%(asctime)s - %(message)s',
     level=logging.INFO
@@ -20,28 +21,28 @@ class VideoScraper:
 
     def initialize_driver(self):
         options = uc.ChromeOptions()
-        
-        # Rastgele bir tarayıcı başlığı ekleyin
+
+        # Random browser user-agent
         options.add_argument(f'user-agent={self.get_random_user_agent()}')
-        
-        # Tarayıcı pencere boyutu ayarlayın
+
+        # Window size
         options.add_argument('--window-size=1920,1080')
-        
-        # Sandbox ve Dev/SHM kullanımlarını devre dışı bırakın
+
+        # Disable sandbox and dev/shm usage
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        
-        # Proxy ayarlamak isteğe bağlıdır
+
+        # Optional: Set up proxy
         if self.proxy:
             options.add_argument(f'--proxy-server={self.proxy}')
-            logging.info(f'Proxy kullanılıyor: {self.proxy}')
+            logging.info(f'Using proxy: {self.proxy}')
 
-        # Tarayıcıyı başlatın
+        # Launch browser
         driver = uc.Chrome(options=options)
-        
-        # Performans logları açın (XHR isteklerini yakalamak için)
+
+        # Enable performance logs to capture XHR requests
         driver.command_executor._commands['getLog'] = ('POST', '/session/$sessionId/log')
-        logging.info("Tarayıcı başlatıldı ve performans logları etkinleştirildi.")
+        logging.info("Browser launched and performance logs enabled.")
         
         return driver
 
@@ -53,106 +54,130 @@ class VideoScraper:
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36"
         ]
         user_agent = random.choice(user_agents)
-        logging.info(f'Kullanılan User-Agent: {user_agent}')
+        logging.info(f'User-Agent set to: {user_agent}')
         return user_agent
 
     def disable_webrtc(self):
-        self.driver.execute_script("""
-            var getUserMedia = navigator.mediaDevices.getUserMedia;
-            navigator.mediaDevices.getUserMedia = function() {
-                return new Promise(function(resolve, reject) {
-                    reject(new Error("WebRTC is disabled"));
-                });
-            }
-        """)
-        logging.info("WebRTC devre dışı bırakıldı.")
+        try:
+            self.driver.execute_script("""
+                var getUserMedia = navigator.mediaDevices.getUserMedia;
+                navigator.mediaDevices.getUserMedia = function() {
+                    return new Promise(function(resolve, reject) {
+                        reject(new Error("WebRTC is disabled"));
+                    });
+                }
+            """)
+            logging.info("WebRTC disabled.")
+        except WebDriverException as e:
+            logging.error(f"Error disabling WebRTC: {e}")
 
     def manipulate_fingerprint(self):
-        self.driver.execute_script("""
-            const getContext = HTMLCanvasElement.prototype.getContext;
-            HTMLCanvasElement.prototype.getContext = function() {
-                return null;
-            };
+        try:
+            self.driver.execute_script("""
+                const getContext = HTMLCanvasElement.prototype.getContext;
+                HTMLCanvasElement.prototype.getContext = function() {
+                    return null;
+                };
 
-            const getChannelData = AudioBuffer.prototype.getChannelData;
-            AudioBuffer.prototype.getChannelData = function() {
-                return new Float32Array(44100);
-            };
+                const getChannelData = AudioBuffer.prototype.getChannelData;
+                AudioBuffer.prototype.getChannelData = function() {
+                    return new Float32Array(44100);
+                };
 
-            Object.defineProperty(screen, 'width', {
-                get: function() { return 1920; }
-            });
-            Object.defineProperty(screen, 'height', {
-                get: function() { return 1080; }
-            });
-        """)
-        logging.info("Tarayıcı parmak izi manipüle edildi.")
+                Object.defineProperty(screen, 'width', {
+                    get: function() { return 1920; }
+                });
+                Object.defineProperty(screen, 'height', {
+                    get: function() { return 1080; }
+                });
+            """)
+            logging.info("Browser fingerprint manipulated.")
+        except WebDriverException as e:
+            logging.error(f"Error manipulating fingerprint: {e}")
 
     def clear_cookies(self):
-        self.driver.delete_all_cookies()
-        logging.info("Çerezler temizlendi.")
+        try:
+            self.driver.delete_all_cookies()
+            logging.info("Cookies cleared.")
+        except WebDriverException as e:
+            logging.error(f"Error clearing cookies: {e}")
 
     def human_like_mouse_movements(self, element):
-        actions = ActionChains(self.driver)
-        actions.move_to_element_with_offset(element, random.randint(-50, 50), random.randint(-50, 50))
+        try:
+            actions = ActionChains(self.driver)
+            actions.move_to_element_with_offset(element, random.randint(-50, 50), random.randint(-50, 50))
 
-        for _ in range(random.randint(3, 7)):
-            x_offset = random.randint(-100, 100)
-            y_offset = random.randint(-100, 100)
-            actions.move_by_offset(x_offset, y_offset)
-            actions.pause(random.uniform(0.1, 0.5))
+            for _ in range(random.randint(3, 7)):
+                x_offset = random.randint(-100, 100)
+                y_offset = random.randint(-100, 100)
+                actions.move_by_offset(x_offset, y_offset)
+                actions.pause(random.uniform(0.1, 0.5))
 
-        actions.move_to_element(element).click().perform()
-        logging.info("Fare hareketleri ve tıklamalar simüle edildi.")
+            actions.move_to_element(element).click().perform()
+            logging.info("Human-like mouse movements and clicks simulated.")
+        except NoSuchElementException as e:
+            logging.error(f"Element not found for human-like movements: {e}")
+        except WebDriverException as e:
+            logging.error(f"Error during mouse movement simulation: {e}")
 
     def get_xhr_requests(self):
-        logs = self.driver.get_log('performance')
-        video_links = []
-        for log in logs:
-            log_message = log["message"]
-            if "m3u8" in log_message or "mp4" in log_message or "mpd" in log_message:
-                start = log_message.find("url") + 6
-                end = log_message.find("\"", start)
-                video_url = log_message[start:end]
-                video_links.append(video_url)
+        try:
+            logs = self.driver.get_log('performance')
+            video_links = []
+            for log in logs:
+                log_message = log["message"]
+                if "m3u8" in log_message or "mp4" in log_message or "mpd" in log_message:
+                    start = log_message.find("url") + 6
+                    end = log_message.find("\"", start)
+                    video_url = log_message[start:end]
+                    video_links.append(video_url)
 
-        logging.info(f"{len(video_links)} video bağlantısı bulundu.")
-        return video_links
+            logging.info(f"{len(video_links)} video links found.")
+            return video_links
+        except WebDriverException as e:
+            logging.error(f"Error fetching XHR requests: {e}")
+            return []
 
     def scrape(self):
-        # Sayfayı başlatın ve gerekli adımları gerçekleştirin
-        self.driver.get(self.url)
-        logging.info(f"Sayfa yüklendi: {self.url}")
-        
-        time.sleep(random.uniform(3, 5))  # Rastgele gecikme
+        try:
+            # Load page and perform necessary actions
+            self.driver.get(self.url)
+            logging.info(f"Page loaded: {self.url}")
 
-        # WebRTC ve parmak izi manipülasyonları
-        self.disable_webrtc()
-        self.manipulate_fingerprint()
+            time.sleep(random.uniform(3, 5))  # Random delay
 
-        # Çerezleri temizleyin
-        self.clear_cookies()
+            # WebRTC and fingerprint manipulations
+            self.disable_webrtc()
+            self.manipulate_fingerprint()
 
-        # Sayfada insan davranışıyla gezinme
-        element = self.driver.find_element(By.TAG_NAME, 'body')
-        self.human_like_mouse_movements(element)
+            # Clear cookies
+            self.clear_cookies()
 
-        # XHR üzerinden video linklerini yakalayın
-        video_links = self.get_xhr_requests()
+            # Simulate human behavior on the page
+            element = self.driver.find_element(By.TAG_NAME, 'body')
+            self.human_like_mouse_movements(element)
 
-        # Video bağlantılarını döndürün
-        if video_links:
-            logging.info("Bulunan video URL'leri:")
-            for link in video_links:
-                logging.info(link)
-        else:
-            logging.warning("Video bağlantısı bulunamadı.")
-        
-        # Tarayıcıyı kapatın
-        self.driver.quit()
-        logging.info("Tarayıcı kapatıldı.")
+            # Capture video links via XHR requests
+            video_links = self.get_xhr_requests()
 
-# Örnek kullanım
+            # Log video links found
+            if video_links:
+                logging.info("Video URLs found:")
+                for link in video_links:
+                    logging.info(link)
+            else:
+                logging.warning("No video links found.")
+
+        except TimeoutException as e:
+            logging.error(f"Page load timeout: {e}")
+        except WebDriverException as e:
+            logging.error(f"WebDriver error: {e}")
+        finally:
+            # Ensure the driver is closed
+            self.driver.quit()
+            logging.info("Browser closed.")
+
+# Example usage
 if __name__ == "__main__":
     url = "https://www.example.com"
     scraper = VideoScraper(url)
