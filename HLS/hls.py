@@ -21,7 +21,12 @@ class VideoScraper:
         self.url = url
         self.proxy = proxy
         self.max_retries = max_retries
-        self.driver = self.initialize_driver()
+        self.driver = None
+        try:
+            self.driver = self.initialize_driver()
+        except WebDriverException as e:
+            logging.error(f"Driver initialization failed: {e}")
+            raise
 
     def initialize_driver(self):
         options = uc.ChromeOptions()
@@ -44,14 +49,16 @@ class VideoScraper:
             options.add_argument(f'--proxy-server={self.proxy}')
             logging.info(f'Using proxy: {self.proxy}')
 
-        # Launch browser
-        driver = uc.Chrome(options=options)
-
-        # Enable performance logs to capture XHR requests
-        driver.command_executor._commands['getLog'] = ('POST', '/session/$sessionId/log')
-        logging.info("Browser launched and performance logs enabled.")
-        
-        return driver
+        try:
+            # Launch browser
+            driver = uc.Chrome(options=options)
+            # Enable performance logs to capture XHR requests
+            driver.command_executor._commands['getLog'] = ('POST', '/session/$sessionId/log')
+            logging.info("Browser launched and performance logs enabled.")
+            return driver
+        except WebDriverException as e:
+            logging.error(f"Error launching browser: {e}")
+            raise
 
     def get_random_user_agent(self):
         user_agents = [
@@ -189,13 +196,10 @@ class VideoScraper:
                 retries += 1
                 time.sleep(2)  # Short delay before retry
 
-        if retries == self.max_retries:
-            logging.error("Max retries reached. Scraping failed.")
-
         finally:
-            # Ensure the driver is closed
-            self.driver.quit()
-            logging.info("Browser closed.")
+            if self.driver:
+                self.driver.quit()
+                logging.info("Browser closed.")
 
 # Example usage
 if __name__ == "__main__":
