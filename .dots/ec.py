@@ -14,7 +14,7 @@ def o(b,c):return Fernet(c).encrypt(b.encode())
 def p(b,c):return Fernet(c).decrypt(b).decode()
 def q(b,c):r=os.urandom(12);s=Cipher(algorithms.ChaCha20(c,r),mode=None,backend=default_backend()).encryptor();return r+s.update(b.encode())+s.finalize()
 def t(b,c):r,s=b[:12],b[12:];u=Cipher(algorithms.ChaCha20(c,r),mode=None,backend=default_backend()).decryptor();return u.update(s)+u.finalize()
-def v():print("Seçin:\n1. AES-256\n2. RSA 4096-bit\n3. Fernet\n4. ChaCha20\n5. Sezar\n6. Vigenère");w=int(input("Seçim (1-6): "))
+def v():w=int(input("Seçin:\n1. AES-256\n2. RSA 4096-bit\n3. Fernet\n4. ChaCha20\n5. Sezar\n6. Vigenère\nSeçim (1-6): "));x,y,z=None,None,None
 if w==1:x=os.urandom(32);y=input("Metni girin: ");z=h(y,x);print(f"Şifrelenmiş (AES-256): {z}");print(f"Çözülen: {k(z,x).decode()}")
 elif w==2:(A,B)=rsa.newkeys(4096);y=input("Metni girin: ");z=m(y,A);print(f"Şifrelenmiş (RSA-4096): {z}");print(f"Çözülen: {n(z,B)}")
 elif w==3:x=Fernet.generate_key();y=input("Metni girin: ");z=o(y,x);print(f"Şifrelenmiş (Fernet): {z}");print(f"Çözülen: {p(z,x)}")
