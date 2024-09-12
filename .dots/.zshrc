@@ -12,7 +12,7 @@ plugins=(
 	colored-man-pages
 	zsh-autosuggestions
 	zsh-syntax-highlighting
- archlinux
+    archlinux
 	eza
 )
 
@@ -128,6 +128,7 @@ alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 alias rm='rm -I --preserve-root'
 alias shred='shred -u -v -n 35 -z'
+alias sudo='run0'
 
 # Make 'cd' also list directory contents
 function cd() {
