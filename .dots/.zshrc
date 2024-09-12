@@ -128,7 +128,7 @@ alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 alias rm='rm -I --preserve-root'
 alias shred='shred -u -v -n 35 -z'
-alias sudo='run0'
+alias sudo='run0 --background=44 --nice=10 --unit=sudounit'
 
 # Make 'cd' also list directory contents
 function cd() {
