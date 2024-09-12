@@ -3,17 +3,17 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="xiong-chiamiov-plus"
 
 plugins=(
-	git
-	sudo
-	web-search
-	python
-	pip
-	history-substring-search
-	colored-man-pages
-	zsh-autosuggestions
-	zsh-syntax-highlighting
+    git
+    sudo
+    web-search
+    python
+    pip
+    history-substring-search
+    colored-man-pages
+    zsh-autosuggestions
+    zsh-syntax-highlighting
     archlinux
-	eza
+    eza
 )
 
 source $ZSH/oh-my-zsh.sh
