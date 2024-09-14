@@ -1,5 +1,3 @@
-export ZSH="$HOME/.oh-my-zsh"
-
 ZSH_THEME="xiong-chiamiov-plus"
 
 plugins=(
@@ -16,9 +14,6 @@ plugins=(
     eza
 )
 
-source $ZSH/oh-my-zsh.sh
-
-pokemon-colorscripts --no-title -s -r
 source <(fzf --zsh)
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
@@ -128,7 +123,9 @@ alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 alias rm='rm -I --preserve-root'
 alias shred='shred -u -v -n 35 -z'
-alias sudo='run0 --background=44 --nice=10 --unit=sudounit --description="Sudo-like command with run0"'
+
+# sudo komutuna NixOS'ta run0 ihtiyacı yok, Nix paket yöneticisini kullanıyor olabilirsiniz
+alias sudo='sudo'
 
 # Make 'cd' also list directory contents
 function cd() {
@@ -165,3 +162,26 @@ fi
 if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
     source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
+
+# Flatpak uygulamasını ve onunla ilişkili tüm verileri kaldırmak için bir fonksiyon
+flatpak_clean_remove() {
+    if [ -z "$1" ]; then
+        echo "Lütfen silmek istediğiniz Flatpak uygulamasının adını girin."
+        return 1
+    fi
+
+    # Uygulamayı ve verilerini sil
+    echo "Uygulama ve veriler siliniyor: $1"
+    flatpak uninstall --delete-data $1
+
+    # Kullanılmayan bağımlılıkları kaldır
+    echo "Kullanılmayan bağımlılıklar kaldırılıyor..."
+    flatpak remove --unused
+
+    # Uygulama verilerini ve cache dosyalarını manuel olarak sil
+    echo "Kullanıcı verileri ve önbellek temizleniyor..."
+    rm -rf ~/.var/app/$1
+    rm -rf ~/.cache/$1
+
+    echo "Flatpak uygulaması ve ilişkili veriler temizlendi: $1"
+}
