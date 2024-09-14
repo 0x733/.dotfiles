@@ -32,8 +32,9 @@ def main(stdscr):
             stdscr.addstr(14,0,"Press 'g' to generate a new password with the current settings.")
         k=stdscr.getch()
         if k==ord('1'):
-            stdscr.clear();stdscr.addstr(0,0,"Şifre uzunluğunu girin: ");stdscr.refresh();curses.echo();length_input=stdscr.getstr(0,22).decode('utf-8')
-            l=int(length_input);curses.noecho()
+            stdscr.clear();stdscr.addstr(0,0,"Şifre uzunluğunu girin: ");stdscr.refresh();curses.echo();length_input=stdscr.getstr(0,24).decode('utf-8')
+            if length_input.isdigit():l=int(length_input)
+            curses.noecho()
         elif k==ord('2'):u=not u
         elif k==ord('3'):lc=not lc
         elif k==ord('4'):n=not n
