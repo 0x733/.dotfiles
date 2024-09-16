@@ -1,19 +1,31 @@
 #EXTM3U
 
-#EXTINF:-1,Enna: Kara Büyü
+#EXTINF:-1 tvg-name="Enna: Kara Büyü" tvg-language="Turkish" tvg-country="TR" tvg-id="EnnaKaraBuyu" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2024/09/enna-kara-buyu.jpg" group-title="Korku",Enna: Kara Büyü
 https://vs5.photofunia.org/v/zi5f9iaiuao4/1080.m3u8
 
-#EXTINF:-1,Kuyu
+#EXTINF:-1 tvg-name="Kuyu" tvg-language="Turkish" tvg-country="TR" tvg-id="Kuyu" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2024/09/Kuyu.jpg" group-title="Korku",Kuyu
 https://vs5.photour.org/v/vnfadexdc766/1080.m3u8
 
-#EXTINF:-1,Bezm-i Ezel
+#EXTINF:-1 tvg-name="Bezm-i Ezel" tvg-language="Turkish" tvg-country="TR" tvg-id="Bezm-i-Ezel" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2024/08/Bezm-i-Ezel.jpg" group-title="Korku",Bezm-i Ezel
 https://vs8.photofunny.org/v/ple7ugy17jwa/1080.m3u8
 
-#EXTINF:-1,Mefruh: Vahşeti Cin
+#EXTINF:-1 tvg-name="Mefruh: Vahşeti Cin" tvg-language="Turkish" tvg-country="TR" tvg-id="Mefruh-Vahseti-Cin" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2024/08/Mefruh-Vahseti-Cin.jpg" group-title="Korku",Mefruh: Vahşeti Cin
 https://vs6.photofunny.org/v/whqalimnx5s4/1080.m3u8
 
-#EXTINF:-1,İki
-https://s23.imgmania.org/m9/FJgcYwVjZGphI0IPYHEZYwRjBQOjd0zxnJ1aoJShnJRho3Was0xi23vr1b1080
+#EXTINF:-1 tvg-name="Lanet: Ervah Cinleri" tvg-language="Turkish" tvg-country="TR" tvg-id="Lanet-Ervah-Cinleri" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2023/10/093553.jpg" group-title="Korku",Lanet: Ervah Cinleri
+https://p2.photofunny.org/v/m6gb16s2mvck/720.m3u8
 
-#EXTINF:-1,Mühr-ü Musallat: Perihan
-https://box-1030-f.vmeas.cloud/hls/xqx2po2qbnokjiqbtfvcfmyyukpgxsmssw72gxfok56oabk7bgfxyhzdvtga/index-v1-a1.m3u8
+#EXTINF:-1 tvg-name="Kabr-i Cin: Mühür" tvg-language="Turkish" tvg-country="TR" tvg-id="Kabr-i-Cin-Muhur" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2023/10/Kabr-i-Cin-Muhur.jpg" group-title="Korku",Kabr-i Cin: Mühür
+https://vs8.picmage.live/v/1gu5oevwr30d/1080.m3u8
+
+#EXTINF:-1 tvg-name="Şerr-i Cin" tvg-language="Turkish" tvg-country="TR" tvg-id="Serr-i-Cin" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2023/10/Serr-i-Cin.jpg" group-title="Korku",Şerr-i Cin
+https://vs7.ugphotos.live/v/hqtlsyu5szvw/1080.m3u8
+
+#EXTINF:-1 tvg-name="Azem Cin Karası (Test)" tvg-language="Turkish" tvg-country="TR" tvg-id="Azem-Cin-Karasi" tvg-logo="https://korku.tv/wp-content/uploads/2020/03/azem-cin-karas%C4%B1.jpg" group-title="Korku",Azem Cin Karası (Test)
+https://wose-12.getromes.space/xqx2p5khkbokjiqbtgucnlad4vvdyrdk3fka2sbesohr7g6vkwzfp5umfxbq/ew4q70w6rsi8.mp4
+
+#EXTINF:-1 tvg-name="Cin Köyü" tvg-language="Turkish" tvg-country="TR" tvg-id="Cin-Koyu" tvg-logo="https://filmhdizle.net/wp-content/uploads/2024/07/cin-koyu-1.jpg" group-title="Korku",Cin Köyü
+https://p1.photofunia.org/v/fd0dy5c41hkt/720.m3u8
+
+#EXTINF:-1 tvg-name="MAKKA: Cinn-i Azap" tvg-language="Turkish" tvg-country="TR" tvg-id="MAKKA-Cinn-i-Azap" tvg-logo="https://filmhdizle.net/wp-content/uploads/2024/05/makka-cinn-i-azap.jpg" group-title="Korku",MAKKA: Cinn-i Azap
+https://p1.photofunny.org/v/8xhcm2xaayeh/720.m3u8
