@@ -2,7 +2,8 @@ name: Check M3U URLs and Create Issue on Failure
 
 on:
   schedule:
-    - cron: '0 0 */2 * *' 
+    - cron: '0 0 */2 * *'
+  workflow_dispatch:
 
 jobs:
   test-url-responses:
