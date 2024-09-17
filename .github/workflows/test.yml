@@ -1,0 +1,53 @@
+name: Check M3U URLs and Create Issue on Failure
+
+on:
+  schedule:
+    - cron: '0 0 */2 * *' 
+
+jobs:
+  test-url-responses:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: sudo apt-get update && sudo apt-get install -y curl jq
+
+      - id: test-urls
+        run: |
+          FAILED_URLS=""
+          while IFS= read -r line; do
+            if [[ "$line" == *EXTINF* ]]; then
+              TITLE=$(echo "$line" | sed -n 's/.*tvg-name="\([^"]*\)".*/\1/p')
+            fi
+            if [[ "$line" == *http-user-agent* ]]; then
+              USER_AGENT=$(echo "$line" | sed -n 's/.*http-user-agent=\(.*\)/\1/p')
+            fi
+            if [[ "$line" == *http-referrer* ]]; then
+              REFERRER=$(echo "$line" | sed -n 's/.*http-referrer=\(.*\)/\1/p')
+            fi
+            if [[ "$line" == http* ]]; then
+              URL="$line"
+              RESPONSE=$(curl -A "$USER_AGENT" -e "$REFERRER" -s -o /dev/null -w "%{http_code}" "$URL")
+              if [ "$RESPONSE" -ne 200 ]; then
+                FAILED_URLS="$FAILED_URLS\n- $TITLE: $URL (Response: $RESPONSE)"
+              fi
+            fi
+          done < HLS/Filmler.m3u
+          if [ -n "$FAILED_URLS" ]; then
+            echo "::set-output name=failed_urls::$FAILED_URLS"
+            exit 1
+          fi
+
+      - if: failure()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Broken URLs Detected',
+              body: `The following URLs failed during the recent check:\n${{ steps.test-urls.outputs.failed_urls }}`,
+              labels: ['bug', 'auto-generated']
+            });
