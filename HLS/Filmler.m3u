@@ -35,10 +35,11 @@ https://vs8.picmage.live/v/1gu5oevwr30d/1080.m3u8
 #EXTVLCOPT:http-referrer=https://hdfilmcehennemi.so/
 https://vs7.ugphotos.live/v/hqtlsyu5szvw/1080.m3u8
 
-#EXTINF:-1 tvg-name="Azem Cin Karası (Test)" tvg-language="Turkish" tvg-country="TR" tvg-id="Azem-Cin-Karasi" tvg-logo="https://korku.tv/wp-content/uploads/2020/03/azem-cin-karas%C4%B1.jpg" group-title="Korku",Azem Cin Karası (Test)
+#EXTINF:-1 tvg-name="Azem Cin Karası" tvg-language="Turkish" tvg-country="TR" tvg-id="Azem-Cin-Karasi" tvg-logo="https://korku.tv/wp-content/uploads/2020/03/azem-cin-karas%C4%B1.jpg" group-title="Korku",Azem Cin Karası (Test)
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5)
-#EXTVLCOPT:http-referrer=https://korku.tv/
-https://wose-12.getromes.space/xqx2p5khkbokjiqbtgucnlad4vvdyrdk3fka2sbesohr7g6vkwzfp5umfxbq/ew4q70w6rsi8.mp4
+#EXTVLCOPT:http-referrer=https://vidmoly.to/
+https://wose-12.getromes.space/hls/xqx2p5khkbokjiqbtgucnlad4vvdyrdk3fka2sbes,njr7g6vkwzp663ln2da,e3r7g6vkwzdtozxgiwa,.urlset/master.m3u8
+
 
 #EXTINF:-1 tvg-name="Cin Köyü" tvg-language="Turkish" tvg-country="TR" tvg-id="Cin-Koyu" tvg-logo="https://filmhdizle.net/wp-content/uploads/2024/07/cin-koyu-1.jpg" group-title="Korku",Cin Köyü
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5)
