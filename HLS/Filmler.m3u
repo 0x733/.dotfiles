@@ -175,3 +175,18 @@ https://cdn.dzeninfra.com/vod/converted-video/vod-content/10/37/41/60/37/17/12/3
 #EXTVLCOPT:http-user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5)
 #EXTVLCOPT:http-referrer=https://jetv.xyz/
 https://cdn.dzeninfra.com/vod/converted-video/vod-content/13/05/01/22/23/56/67/60/72/8/8891150c-df07-4f1e-a920-c39cd6c0fb7f/kaltura/desc_5c59052f7f520575c3505250d7107840/vi-ipDogG5Vg/master.m3u8
+
+#EXTINF:-1 tvg-name="Şeytan" tvg-language="Turkish" tvg-country="TR" tvg-id="Şeytan" tvg-logo="https://hdfilmcehennemi.so/wp-content/uploads/2023/10/Seytan-1.jpg" group-title="Korku",Şeytan
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5)
+#EXTVLCOPT:http-referrer=https://hdfilmcehennemi.so/
+https://p2.photofunny.org/v/0u84ypyxs267/master.m3u8
+
+#EXTINF:-1 tvg-name="Mihrez Cin Padişahı" tvg-language="Turkish" tvg-country="TR" tvg-id="Mihrez Cin Padişahı" tvg-logo="https://jetfilmizle.link/wp-content/posterler/2022/09/mihrez-cin-padisahi-izle.jpg" group-title="Korku",Mihrez Cin Padişahı
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5)
+#EXTVLCOPT:http-referrer=https://jetv.xyz/
+https://cdn.dzeninfra.com/vod/converted-video/vod-content/54/40/17/86/85/97/99/00/03/4/a3c11709-83a0-4646-9383-d42dcd61a5f6/kaltura/desc_6bf771623e37e9b5ca9e56784b15f52e/v_V_OM1tX9Fo/master.m3u8
+
+#EXTINF:-1 tvg-name="Mihrez 2 Cin Padisahi" tvg-language="Turkish" tvg-country="TR" tvg-id="Mihrez 2 Cin Padisahi" tvg-logo="https://jetfilmizle.link/wp-content/posterler/2023/02/mihrez-2-cin-padisahi-mihrez-2-cin-padisahi-izle-2022.jpg" group-title="Korku",Mihrez 2 Cin Padisahi
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5)
+#EXTVLCOPT:http-referrer=https://cdn.dzeninfra.com/vod/converted-video/vod-content/86/95/10/09/19/75/16/35/15/9/16325f2c-36d7-4675-b795-3c675b3f1b77/kaltura/desc_29f8c009cf1b073aa0720f70ff81b1c2/vQFCc3JH_3zA/master.m3u8/
+https://cdn.dzeninfra.com/vod/converted-video/vod-content/86/95/10/09/19/75/16/35/15/9/16325f2c-36d7-4675-b795-3c675b3f1b77/kaltura/desc_29f8c009cf1b073aa0720f70ff81b1c2/vQFCc3JH_3zA/master.m3u8
