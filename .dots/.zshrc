@@ -10,7 +10,7 @@ plugins=(
     colored-man-pages
     zsh-autosuggestions
     zsh-syntax-highlighting
-    archlinux
+    dnf
     eza
 )
 
@@ -123,9 +123,6 @@ alias chmod='chmod --preserve-root'
 alias chgrp='chgrp --preserve-root'
 alias rm='rm -I --preserve-root'
 alias shred='shred -u -v -n 35 -z'
-
-# sudo komutuna NixOS'ta run0 ihtiyacı yok, Nix paket yöneticisini kullanıyor olabilirsiniz
-alias sudo='sudo'
 
 # Make 'cd' also list directory contents
 function cd() {
