@@ -1,3 +1,5 @@
+export ZSH="$HOME/.oh-my-zsh"
+
 ZSH_THEME="xiong-chiamiov-plus"
 
 plugins=(
@@ -13,6 +15,10 @@ plugins=(
     dnf
     eza
 )
+
+source $ZSH/oh-my-zsh.sh
+
+fastfetch -c $HOME/.config/fastfetch/config-compact.jsonc
 
 source <(fzf --zsh)
 HISTFILE=~/.zsh_history
