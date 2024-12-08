@@ -1,46 +1,60 @@
 import requests
 import json
+import sys
+from typing import Dict, Optional
 
-def main():
-    # Get BBK code from user
-    bbk_value = input("BBK kodunu girin: ")
-    url = f'https://user.goknet.com.tr/sistem/getTTAddressWebservice.php?kod={bbk_value}&datatype=checkAddress'
+def get_address_data(bbk_code: str) -> Optional[Dict]:
+    url = f'https://user.goknet.com.tr/sistem/getTTAddressWebservice.php'
+    params = {
+        'kod': bbk_code,
+        'datatype': 'checkAddress'
+    }
     
     try:
-        # Send GET request with timeout
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()  # Raises HTTPError for bad responses
-        
-        # Parse JSON data
-        data = response.json()
-        
-        for key, value in data.items():
-            print(f"\nAdres {key}:")
-            
-            flex_list = value.get('flexList', {}).get('flexList')
-            if isinstance(flex_list, list):
-                for item in flex_list:
-                    name = item.get('name')
-                    val = item.get('value')
-                    if name and val:
-                        print(f"{name}: {val}")
-                        
-            # Check for errors in response
-            hata_kod = value.get('hataKod')
-            hata_mesaj = value.get('hataMesaj')
-            if hata_kod:
-                print(f"Hata Kodu: {hata_kod}")
-            if hata_mesaj:
-                print(f"Hata Mesajı: {hata_mesaj}")
-    
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
     except requests.exceptions.Timeout:
         print("İstek zaman aşımına uğradı.")
     except requests.exceptions.RequestException as e:
-        print(f"Bir istek hatası oluştu: {e}")
+        print(f"Bağlantı hatası: {e}")
     except json.JSONDecodeError:
-        print("Gelen yanıt geçerli bir JSON formatında değil.")
-    except KeyError as e:
-        print(f"Beklenmeyen JSON yapısı: {e}")
+        print("Geçersiz yanıt formatı.")
+    return None
+
+def parse_flex_list(flex_list: list) -> None:
+    for item in flex_list:
+        name = item.get('name')
+        value = item.get('value')
+        if name and value:
+            print(f"{name}: {value}")
+
+def display_address_info(data: Dict) -> None:
+    for key, value in data.items():
+        print(f"\nAdres {key}:")
+        
+        if flex_list := value.get('flexList', {}).get('flexList'):
+            if isinstance(flex_list, list):
+                parse_flex_list(flex_list)
+        
+        if hata_kod := value.get('hataKod'):
+            print(f"Hata Kodu: {hata_kod}")
+        if hata_mesaj := value.get('hataMesaj'):
+            print(f"Hata Mesajı: {hata_mesaj}")
+
+def main():
+    try:
+        bbk_code = input("BBK kodunu girin: ").strip()
+        if not bbk_code:
+            print("BBK kodu boş olamaz.")
+            return
+        
+        if data := get_address_data(bbk_code):
+            display_address_info(data)
+            
+    except Exception as e:
+        print(f"Beklenmeyen bir hata oluştu: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
