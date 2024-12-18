@@ -79,6 +79,8 @@ alias tarx='tar -xzvf'
 alias tarl='tar -tzvf'
 alias zipc='zip -r'
 alias unzipc='unzip'
+alias sar='sar(){ tar -cf - --no-same-owner "$@" | pv -s $(du -sb "$@" | awk '"'"'{print $1}'"'"') > "$@.tar"; unset -f sar; }; sar'
+alias coz='coz(){ tar -xf --no-same-owner "$@" | pv -s $(du -sb "$@" | awk '"'"'{print $1}'"'"'); unset -f coz; }; coz'
 
 # Media and Conversion
 alias yt='yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio" --merge-output-format mp4'
